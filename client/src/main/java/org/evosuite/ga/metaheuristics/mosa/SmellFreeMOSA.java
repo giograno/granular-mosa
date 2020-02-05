@@ -52,7 +52,6 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
             do {
                 individual = this.chromosomeFactory.getChromosome();
                 calculateFitness(individual);
-                ((TestChromosome)individual).computeEagerTest();
                 counter++;
             } while (!individual.isSmellFree());
 
@@ -66,5 +65,11 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
 
         logger.debug("Size Archive = " + this.getArchive().size());
         logger.debug("generated " + counter + " for a population of size " + sizePopulation);
+    }
+
+    @Override
+    protected void calculateFitness(T c) {
+        super.calculateFitness(c);
+        ((TestChromosome)c).computeEagerTest();
     }
 }
