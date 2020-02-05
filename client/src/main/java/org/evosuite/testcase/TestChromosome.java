@@ -46,9 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Chromosome representation of test cases
@@ -745,6 +743,11 @@ public class TestChromosome extends ExecutableChromosome {
 	 */
 	public static List<SecondaryObjective<?>> getSecondaryObjectives() {
 		return secondaryObjectives;
+	}
+
+	public void computeEagerTest() {
+		Set<String> coveredMethods = new HashSet<>(getLastExecutionResult().getTrace().getCoveredMethods());
+		setSmellFree(coveredMethods.size() <= 1);
 	}
 
 }

@@ -309,7 +309,9 @@ public class Properties {
 		// many-objective algorithms
 		MOSA, LIPS, MIO,
 		// multiple-objective optimisation algorithms
-		NSGAII, SPEA2
+		NSGAII, SPEA2,
+		// smell free MOSA
+		SMOSA
 	}
 
 	// MOSA PROPERTIES

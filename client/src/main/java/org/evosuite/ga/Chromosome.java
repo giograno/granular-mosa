@@ -65,6 +65,7 @@ public abstract class Chromosome implements Comparable<Chromosome>, Serializable
 
 	private LinkedHashMap<FitnessFunction<?>, Integer> numsCoveredGoals = new LinkedHashMap<FitnessFunction<?>, Integer>();
 
+	private boolean isSmellFree = false;
 	
 	// protected double coverage = 0.0;
 
@@ -640,5 +641,13 @@ public abstract class Chromosome implements Comparable<Chromosome>, Serializable
 	 */
 	public void increaseNumCollisionsByOne() {
 		this.numCollisions++;
+	}
+
+	public boolean isSmellFree() {
+		return isSmellFree;
+	}
+
+	public void setSmellFree(boolean smellFree) {
+		isSmellFree = smellFree;
 	}
 }
