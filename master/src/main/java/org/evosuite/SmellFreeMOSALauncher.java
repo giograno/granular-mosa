@@ -21,11 +21,7 @@ public class SmellFreeMOSALauncher {
                 "-projectCP",
                 "/Users/grano/Documents/SF110/19_jmca/jmca.jar",
                 "-class",
-                "com.soops.CEN4010.JMCA.JParser.JavaCharStream",
-                "-DsourcePath",
-                "/Users/grano/Documents/SF110-src/19_jmca/src/main/java/com/soops/CEN4010/JMCA/JParser/JavaCharStream.java",
-                "-DprojectPath",
-                "/Users/grano/Documents/SF110-src/19_jmca"
+                "com.soops.CEN4010.JMCA.JParser.JavaCharStream"
         };
 
         EvoSuite.main(command);

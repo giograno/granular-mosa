@@ -6,6 +6,7 @@ import org.evosuite.ga.ChromosomeFactory;
 import org.evosuite.ga.ConstructionFailedException;
 import org.evosuite.ga.FitnessFunction;
 import org.evosuite.testcase.TestChromosome;
+import org.evosuite.testcase.TestFitnessFunction;
 import org.evosuite.utils.Randomness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,5 +148,26 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
     protected void calculateFitness(T c) {
         super.calculateFitness(c);
         ((TestChromosome)c).computeEagerTest();
+    }
+
+    @Override
+    /**
+     * Modified version of the updateArchive method. A chromosome can be archived iff is not smelly
+     */
+    protected void updateArchive(T solution, FitnessFunction<T> covered) {
+        TestChromosome tch = (TestChromosome) solution;
+        tch.getTestCase().getCoveredGoals().add((TestFitnessFunction) covered);
+
+        if (archive.containsKey(covered)) {
+            TestChromosome existingSolution = (TestChromosome) this.archive.get(covered);
+            if (solution.compareSecondaryObjective(existingSolution) < 0 && tch.isSmellFree()) {
+                this.archive.put(covered, solution);
+            }
+        } else {
+            if (tch.isSmellFree()) {
+                archive.put(covered, solution);
+                this.uncoveredGoals.remove(covered);
+            }
+        }
     }
 }

@@ -227,7 +227,7 @@ public class MOSA<T extends Chromosome> extends AbstractMOSA<T> {
 	 * 
 	 * @param solutionSet is the list of Chromosomes (population)
 	 */
-	private void updateArchive(T solution, FitnessFunction<T> covered) {
+	protected void updateArchive(T solution, FitnessFunction<T> covered) {
 		// the next two lines are needed since that coverage information are used
 		// during EvoSuite post-processing
 		TestChromosome tch = (TestChromosome) solution;

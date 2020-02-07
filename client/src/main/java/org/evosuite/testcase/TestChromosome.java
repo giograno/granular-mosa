@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Chromosome representation of test cases
@@ -747,7 +748,11 @@ public class TestChromosome extends ExecutableChromosome {
 
 	public void computeEagerTest() {
 		Set<String> coveredMethods = new HashSet<>(getLastExecutionResult().getTrace().getCoveredMethods());
-		setSmellFree(coveredMethods.size() <= 1);
+		Set<String> branchlessCoveredMethods = new HashSet<>(getLastExecutionResult().getTrace()
+				.getCoveredBranchlessMethods());
+		coveredMethods.addAll(branchlessCoveredMethods);
+		List<String> methods = coveredMethods.stream().filter(s -> !s.contains("<init>")).collect(Collectors.toList());
+		setSmellFree(methods.size() <= 1);
 	}
 
 }
