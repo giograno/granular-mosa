@@ -187,7 +187,7 @@ public abstract class AbstractMOSA<T extends Chromosome> extends GeneticAlgorith
 	/**
 	 * Method used to mutate an offspring
 	 */
-	private void mutate(T offspring, T parent){
+	protected void mutate(T offspring, T parent){
 		offspring.mutate();
 		TestChromosome tch = (TestChromosome) offspring;
 		if (!offspring.isChanged()) {
