@@ -114,6 +114,11 @@
 
 	<logger name="org.evosuite.shaded" level="OFF" />
 
+<!--		<logger name="org.evosuite.testcase.TestChromosome" level="${log.level:-DEBUG}">-->
+<!--			<appender-ref ref="STDOUT_${evosuite.log.appender:-MASTER}" />-->
+<!--			<appender-ref ref="STDERR_${evosuite.log.appender:-MASTER}" />-->
+<!--		</logger>-->
+
 	<!-- for a specific logger, enables all the logging. this is useful when 
 		we are debugging a particular class -->
 

@@ -56,7 +56,6 @@ import org.evosuite.utils.Randomness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.googlecode.gentyref.GenericTypeReflector;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -1201,4 +1200,6 @@ public class DefaultTestCase implements TestCase, Serializable {
 	public String toString() {
 		return toCode();
 	}
+
+	public ListenableList<Statement> getStatements() { return this.statements; }
 }

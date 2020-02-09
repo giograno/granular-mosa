@@ -34,12 +34,15 @@ import org.evosuite.symbolic.BranchCondition;
 import org.evosuite.symbolic.ConcolicExecution;
 import org.evosuite.symbolic.ConcolicMutation;
 import org.evosuite.testcase.execution.ExecutionResult;
+import org.evosuite.testcase.execution.ExecutionTrace;
 import org.evosuite.testcase.localsearch.TestCaseLocalSearch;
 import org.evosuite.testcase.statements.FunctionalMockStatement;
+import org.evosuite.testcase.statements.MethodStatement;
 import org.evosuite.testcase.statements.PrimitiveStatement;
 import org.evosuite.testcase.statements.Statement;
 import org.evosuite.testcase.variable.VariableReference;
 import org.evosuite.testsuite.TestSuiteFitnessFunction;
+import org.evosuite.utils.ListenableList;
 import org.evosuite.utils.Randomness;
 import org.evosuite.utils.generic.GenericAccessibleObject;
 import org.slf4j.Logger;
@@ -746,13 +749,21 @@ public class TestChromosome extends ExecutableChromosome {
 		return secondaryObjectives;
 	}
 
+	/**
+	 * Iterates over the statements of a test case, filtering the {@link MethodStatement} only.
+	 * Then, checks whether the declaring class of the method is the target class.
+	 * If more than 1 method is found, this chromosome is set to be flaky.
+	 */
 	public void computeEagerTest() {
-		Set<String> coveredMethods = new HashSet<>(getLastExecutionResult().getTrace().getCoveredMethods());
-		Set<String> branchlessCoveredMethods = new HashSet<>(getLastExecutionResult().getTrace()
-				.getCoveredBranchlessMethods());
-		coveredMethods.addAll(branchlessCoveredMethods);
-		List<String> methods = coveredMethods.stream().filter(s -> !s.contains("<init>")).collect(Collectors.toList());
-		setSmellFree(methods.size() <= 1);
+		ListenableList<Statement> statements = ((DefaultTestCase) this.test).getStatements();
+		Set<String> methodStatements = statements.stream().filter(s -> s instanceof MethodStatement)
+				.filter(s -> ((MethodStatement) s).getMethod().getMethod()
+						.getDeclaringClass().getName() == Properties.TARGET_CLASS)
+						.map(s -> s.toString())
+						.collect(Collectors.toSet());
+
+		logger.debug("Number of methods found = " + methodStatements.size());
+		setSmellFree(methodStatements.size() <= 1);
 	}
 
 }
