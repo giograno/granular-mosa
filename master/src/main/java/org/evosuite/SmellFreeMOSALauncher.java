@@ -6,14 +6,14 @@ public class SmellFreeMOSALauncher {
 
         String[] command = {
                 "-generateMOSuite",
-                "-Dcriterion=METHOD",
+                "-Dcriterion=BRANCH",
                 "-Dconfiguration_id=test",
                 "-Dminimize=FALSE",
                 "-Dpopulation=50",
                 "-Dalgorithm=SMOSA",
                 "-Dassertions=FALSE",
                 "-Dsearch_budget=30",
-                "-Dclient_on_thread=true",
+                "-Dclient_on_thread=false",
                 "-Dminimize=false",
                 "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals," +
                         "Generations,Statements_Executed,Fitness_Evaluations,Tests_Executed,Generations,Total_Time," +

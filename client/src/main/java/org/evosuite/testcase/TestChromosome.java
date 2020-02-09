@@ -763,7 +763,7 @@ public class TestChromosome extends ExecutableChromosome {
 						.collect(Collectors.toSet());
 
 		logger.debug("Number of methods found = " + methodStatements.size());
-		setSmellFree(methodStatements.size() <= 1);
+		setSmellFree(methodStatements.size() <= 2);
 	}
 
 }
