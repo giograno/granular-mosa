@@ -88,6 +88,8 @@ public class DefaultTestCase implements TestCase, Serializable {
 
 	private int id;
 
+	private boolean hasCall;
+
 	/**
 	 * Constructor
 	 */
@@ -1202,4 +1204,12 @@ public class DefaultTestCase implements TestCase, Serializable {
 	}
 
 	public ListenableList<Statement> getStatements() { return this.statements; }
+
+	public boolean hasCall() {
+		return hasCall;
+	}
+
+	public void setWithCall(boolean hasCall) {
+		this.hasCall = hasCall;
+	}
 }

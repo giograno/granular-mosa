@@ -152,7 +152,7 @@ public class RandomInsertion implements InsertionStrategy {
 		}
 	}
 	
-	private VariableReference selectRandomVariableForCall(TestCase test, int position) {
+	protected VariableReference selectRandomVariableForCall(TestCase test, int position) {
 		if (test.isEmpty() || position == 0)
 			return null;
 

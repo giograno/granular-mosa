@@ -718,7 +718,8 @@ public class TestClusterGenerator {
 
 			}
 		}
-
+		/** priority queue used by SMOSA to select the least used method */
+		cluster.fillPriorityQueueOfCalls();
 		logger.info("Finished analyzing target class");
 	}
 

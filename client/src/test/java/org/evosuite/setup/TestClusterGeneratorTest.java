@@ -20,8 +20,13 @@
 package org.evosuite.setup;
 
 import java.io.File;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.PriorityQueue;
 
 import org.evosuite.runtime.RuntimeSettings;
+import org.evosuite.utils.generic.GenericAccessibleObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,5 +54,59 @@ public class TestClusterGeneratorTest {
 		RuntimeSettings.useVFS = true;
 		boolean canUse = TestClusterUtils.checkIfCanUse(File.class.getCanonicalName());
 		Assert.assertFalse(canUse);
+	}
+
+	@Test
+	public void testMap() {
+		final class MyEntry implements Map.Entry<String, Integer> {
+			private final String key;
+			private Integer value;
+
+			public MyEntry(String key, Integer value) {
+				this.key = key;
+				this.value = value;
+			}
+
+			@Override
+			public String getKey() {
+				return key;
+			}
+
+			@Override
+			public Integer getValue() {
+				return value;
+			}
+
+			@Override
+			public Integer setValue(Integer value) {
+				Integer old = this.value;
+				this.value = value;
+				return old;
+			}
+		}
+		PriorityQueue<MyEntry> sortedCells = new PriorityQueue<>(1000, (o1, o2) -> {
+			if (o1.value < o2.value)
+				return -1;
+			else if (o1.value > o2.value)
+				return 1;
+			else
+				return 0;
+		});
+		PriorityQueue<Map.Entry<GenericAccessibleObject<?>, Integer>> sortedCelld =
+				new PriorityQueue<>(1000, (o1, o2) -> {
+			if (o1.getValue() < o2.getValue())
+				return -1;
+			else if (o1.getValue() > o2.getValue())
+				return 1;
+			else
+				return 0;
+		});
+		sortedCells.add(new MyEntry("test_method_4", 4));
+		sortedCells.add(new MyEntry("test method_1", 1));
+		sortedCells.add(new MyEntry("test method_3", 3));
+		MyEntry poll = sortedCells.poll();
+		Assert.assertTrue(poll.value == 1);
+		MyEntry peek = sortedCells.peek();
+		Assert.assertTrue(peek.value == 3);
 	}
 }

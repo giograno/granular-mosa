@@ -47,6 +47,7 @@ import org.evosuite.setup.*;
 import org.evosuite.testcase.jee.InjectionSupport;
 import org.evosuite.testcase.jee.InstanceOnlyOnce;
 import org.evosuite.testcase.jee.ServletSupport;
+import org.evosuite.testcase.mutation.NotSoRandomInsertion;
 import org.evosuite.testcase.mutation.RandomInsertion;
 import org.evosuite.testcase.statements.*;
 import org.evosuite.testcase.statements.environment.EnvironmentStatements;
@@ -2145,6 +2146,9 @@ public class TestFactory {
 		return -1;
 	}
 
+	public boolean insertCallNoEager(TestCase test, int position) {
+		return true;
+	}
 
 	/**
 	 * Insert a random call for the UUT at the given position
@@ -2216,6 +2220,7 @@ public class TestFactory {
 					// We only use this for static methods to avoid using wrong constructors (?)
 					addMethod(test, m, position, 0);
 				}
+				((DefaultTestCase)test).setWithCall(true);
 			} else if (o.isField()) {
 				GenericField f = (GenericField) o;
 				name = f.getName();
@@ -2306,6 +2311,11 @@ public class TestFactory {
 	public int insertRandomStatement(TestCase test, int lastPosition) {
 		RandomInsertion rs = new RandomInsertion();
 		return rs.insertStatement(test, lastPosition);
+	}
+
+	public int insertNotReallyRandomStatement(TestCase test, int lastPosition) {
+		NotSoRandomInsertion insertion = new NotSoRandomInsertion();
+		return insertion.insertStatement(test, lastPosition);
 	}
 
 	/**

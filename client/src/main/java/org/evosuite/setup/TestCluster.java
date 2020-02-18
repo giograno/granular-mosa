@@ -38,6 +38,7 @@ import org.evosuite.runtime.util.Inputs;
 import org.evosuite.seeding.CastClassManager;
 import org.evosuite.testcase.ConstraintHelper;
 import org.evosuite.testcase.ConstraintVerifier;
+import org.evosuite.testcase.DefaultTestCase;
 import org.evosuite.testcase.TestCase;
 import org.evosuite.testcase.jee.InstanceOnlyOnce;
 import org.evosuite.testcase.variable.VariableReference;
@@ -87,12 +88,49 @@ public class TestCluster {
 
     private EnvironmentTestClusterAugmenter environmentAugmenter;
 
+    private PriorityQueue<MethodOccurrence> methodQueue;
+
     //-------------------------------------------------------------------
+
+	class MethodOccurrence implements Map.Entry<GenericAccessibleObject<?>, Integer> {
+		private final GenericAccessibleObject<?> key;
+		private Integer value;
+
+		public MethodOccurrence(GenericAccessibleObject<?> key, Integer value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		@Override
+		public GenericAccessibleObject<?> getKey() {
+			return key;
+		}
+
+		@Override
+		public Integer getValue() {
+			return value;
+		}
+
+		@Override
+		public Integer setValue(Integer value) {
+			Integer old = this.value;
+			this.value = value;
+			return old;
+		}
+	}
 
     protected TestCluster(){
         environmentAugmenter = new EnvironmentTestClusterAugmenter(this);
 		environmentMethods = new LinkedHashSet<>();
-    }
+	}
+
+	/**
+	 * Returns a map with methods that have been placed in the population
+	 * @return
+	 */
+	public PriorityQueue<MethodOccurrence> getMethodQueue() {
+		return methodQueue;
+	}
 
 	/**
 	 * Instance accessor
@@ -1231,6 +1269,15 @@ public class TestCluster {
 		return testMethods.stream().filter(call -> !call.isConstructor()).collect(Collectors.toList());
 	}
 
+	/**
+	 * Only returns the constructors
+	 * @param testMethods
+	 * @return
+	 */
+	private List<GenericAccessibleObject<?>> getConstructors(List<GenericAccessibleObject<?>> testMethods) {
+		return testMethods.stream().filter(call -> call.isConstructor()).collect(Collectors.toList());
+	}
+
 	private String getKey(GenericAccessibleObject<?> call) {
 		String name = call.getDeclaringClass().getCanonicalName();
 		if(call.isMethod()) {
@@ -1305,7 +1352,22 @@ public class TestCluster {
 			candidateTestMethods = sortCalls(candidateTestMethods);
 		}
 
-		GenericAccessibleObject<?> choice = Properties.SORT_CALLS ? ListUtil.selectRankBiased(candidateTestMethods) : Randomness.choice(candidateTestMethods);
+		GenericAccessibleObject<?> choice;
+
+		if (Properties.CUT_CALLS) {
+			boolean hasCall = ((DefaultTestCase)test).hasCall();
+			/** if there is a call, return a random constructor (todo: is this valid? or just return null?)*/
+			if (hasCall)
+				return Randomness.choice(getConstructors(candidateTestMethods));
+			MethodOccurrence poll = methodQueue.poll();
+			if (poll == null)
+				// if null there are no public method to test, hence, we return a call to a constructor!
+				return Randomness.choice(candidateTestMethods);
+			choice = poll.getKey();
+			methodQueue.add(new MethodOccurrence(poll.key, poll.value+1));
+		} else {
+			choice = Properties.SORT_CALLS ? ListUtil.selectRankBiased(candidateTestMethods) : Randomness.choice(candidateTestMethods);
+		}
 		logger.debug("Chosen call: " + choice);
 		if (choice.getOwnerClass().hasWildcardOrTypeVariables()) {
 			GenericClass concreteClass = choice.getOwnerClass().getGenericInstantiation();
@@ -1325,7 +1387,23 @@ public class TestCluster {
 		return choice;
 	}
 
-
+	/**
+	 * to be called after all the methods have been added to teh list of test methods
+	 */
+	public void fillPriorityQueueOfCalls() {
+		assert testMethods.size() != 0;
+		methodQueue = new PriorityQueue<>((o1, o2) -> {
+			if (o1.value < o2.value)
+				return -1;
+			else if (o1.value > o2.value)
+				return 1;
+			else
+				return 0;
+		});
+		testMethods
+				.stream().filter(i -> i instanceof GenericMethod)
+				.forEach(m -> methodQueue.add(new MethodOccurrence(m, 0)));
+	}
 
 	public int getNumTestCalls() {
 		return testMethods.size();

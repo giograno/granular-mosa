@@ -1150,6 +1150,9 @@ public class Properties {
 	@Parameter(key = "sort_calls", description = "Sort SUT methods by remaining coverage to bias search towards uncovered parts")
 	public static boolean SORT_CALLS = false;
 
+	@Parameter(key = "map_CUT_calls", description = "Use a map to check with SUT call is already in the population")
+	public static boolean CUT_CALLS = false;
+
 	@Parameter(key = "sort_objects", description = "Sort objects in a test to make calls on objects closer to SUT more likely")
 	public static boolean SORT_OBJECTS = false;
 

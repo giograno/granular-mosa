@@ -11,9 +11,10 @@ public class SmellFreeMOSALauncher {
                 "-Dminimize=FALSE",
                 "-Dpopulation=50",
                 "-Dalgorithm=SMOSA",
+                "-Dmap_CUT_calls=true",
                 "-Dassertions=FALSE",
                 "-Dsearch_budget=30",
-                "-Dclient_on_thread=false",
+                "-Dclient_on_thread=true",
                 "-Dminimize=false",
                 "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals," +
                         "Generations,Statements_Executed,Fitness_Evaluations,Tests_Executed,Generations,Total_Time," +
