@@ -106,43 +106,43 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
         return offspringPopulation;
     }
 
-    @Override
-    public void initializePopulation() {
-        notifySearchStarted();
-        currentIteration = 0;
-
-        generateSmellyFreeInitialPopulation(Properties.POPULATION);
-        calculateFitness();
-        this.notifyIteration();
-    }
-
-    /**
-     * Generates an initial population that is free of eager test smell
-     * @param sizePopulation the size of the population
-     */
-    private void generateSmellyFreeInitialPopulation(int sizePopulation) {
-        int counter = 0;
-        for (int i = 0; i < sizePopulation; i++) {
-
-            T individual;
-
-            do {
-                individual = this.chromosomeFactory.getChromosome();
-                calculateFitness(individual);
-                counter++;
-            } while (!individual.isSmellFree());
-
-            for (FitnessFunction<?> fitnessFunction : this.fitnessFunctions)
-                individual.addFitness(fitnessFunction);
-
-            this.population.add(individual);
-            if (isFinished())
-                break;
-        }
-
-        logger.debug("Size Archive = " + this.getArchive().size());
-        logger.debug("generated " + counter + " for a population of size " + sizePopulation);
-    }
+//    @Override
+//    public void initializePopulation() {
+//        notifySearchStarted();
+//        currentIteration = 0;
+//
+//        generateSmellyFreeInitialPopulation(Properties.POPULATION);
+//        calculateFitness();
+//        this.notifyIteration();
+//    }
+//
+//    /**
+//     * Generates an initial population that is free of eager test smell
+//     * @param sizePopulation the size of the population
+//     */
+//    private void generateSmellyFreeInitialPopulation(int sizePopulation) {
+//        int counter = 0;
+//        for (int i = 0; i < sizePopulation; i++) {
+//
+//            T individual;
+//
+//            do {
+//                individual = this.chromosomeFactory.getChromosome();
+//                calculateFitness(individual);
+//                counter++;
+//            } while (!individual.isSmellFree());
+//
+//            for (FitnessFunction<?> fitnessFunction : this.fitnessFunctions)
+//                individual.addFitness(fitnessFunction);
+//
+//            this.population.add(individual);
+//            if (isFinished())
+//                break;
+//        }
+//
+//        logger.debug("Size Archive = " + this.getArchive().size());
+//        logger.debug("generated " + counter + " for a population of size " + sizePopulation);
+//    }
 
     @Override
     protected void calculateFitness(T c) {
@@ -150,24 +150,24 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
         ((TestChromosome)c).computeEagerTest();
     }
 
-    @Override
-    /**
-     * Modified version of the updateArchive method. A chromosome can be archived iff is not smelly
-     */
-    protected void updateArchive(T solution, FitnessFunction<T> covered) {
-        TestChromosome tch = (TestChromosome) solution;
-        tch.getTestCase().getCoveredGoals().add((TestFitnessFunction) covered);
-
-        if (archive.containsKey(covered)) {
-            TestChromosome existingSolution = (TestChromosome) this.archive.get(covered);
-            if (solution.compareSecondaryObjective(existingSolution) < 0 && tch.isSmellFree()) {
-                this.archive.put(covered, solution);
-            }
-        } else {
-            if (tch.isSmellFree()) {
-                archive.put(covered, solution);
-                this.uncoveredGoals.remove(covered);
-            }
-        }
-    }
+//    @Override
+//    /**
+//     * Modified version of the updateArchive method. A chromosome can be archived iff is not smelly
+//     */
+//    protected void updateArchive(T solution, FitnessFunction<T> covered) {
+//        TestChromosome tch = (TestChromosome) solution;
+//        tch.getTestCase().getCoveredGoals().add((TestFitnessFunction) covered);
+//
+//        if (archive.containsKey(covered)) {
+//            TestChromosome existingSolution = (TestChromosome) this.archive.get(covered);
+//            if (solution.compareSecondaryObjective(existingSolution) < 0 && tch.isSmellFree()) {
+//                this.archive.put(covered, solution);
+//            }
+//        } else {
+//            if (tch.isSmellFree()) {
+//                archive.put(covered, solution);
+//                this.uncoveredGoals.remove(covered);
+//            }
+//        }
+//    }
 }

@@ -703,6 +703,10 @@ public class TestCluster {
 	public GenericAccessibleObject<?> getRandomCallFor(GenericClass clazz, TestCase test, int position)
 	        throws ConstructionFailedException {
 
+		boolean hasCall = ((DefaultTestCase)test).hasCall();
+		if (Properties.ALGORITHM == Properties.Algorithm.SMOSA &&
+				Properties.CUT_CALLS && clazz.getClassName() == Properties.TARGET_CLASS && hasCall)
+			return null;
 		Set<GenericAccessibleObject<?>> calls = getCallsFor(clazz, true);
 		Iterator<GenericAccessibleObject<?>> iter = calls.iterator();
 		while(iter.hasNext()) {
@@ -1354,11 +1358,11 @@ public class TestCluster {
 
 		GenericAccessibleObject<?> choice;
 
-		if (Properties.CUT_CALLS) {
+		if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && Properties.CUT_CALLS) {
 			boolean hasCall = ((DefaultTestCase)test).hasCall();
-			/** if there is a call, return a random constructor (todo: is this valid? or just return null?)*/
 			if (hasCall)
-				return Randomness.choice(getConstructors(candidateTestMethods));
+//				return Randomness.choice(getConstructors(new ArrayList<>(testMethods)));
+				return null;
 			MethodOccurrence poll = methodQueue.poll();
 			if (poll == null)
 				// if null there are no public method to test, hence, we return a call to a constructor!

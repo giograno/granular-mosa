@@ -2298,6 +2298,8 @@ public class TestFactory {
 
                 GenericAccessibleObject<?> call = TestCluster.getInstance().getRandomCallFor(var.getGenericClass(), test, position);
 				logger.debug("Chosen call {}", call);
+				if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && call == null)
+					return true;
 				return addCallFor(test, var, call, position);
 			} catch (ConstructionFailedException e) {
 				logger.debug("Found no modifier: {}", e);

@@ -25,10 +25,7 @@ import java.util.stream.Collectors;
 import org.evosuite.Properties;
 import org.evosuite.ga.ConstructionFailedException;
 import org.evosuite.setup.TestCluster;
-import org.evosuite.testcase.ConstraintHelper;
-import org.evosuite.testcase.ConstraintVerifier;
-import org.evosuite.testcase.TestCase;
-import org.evosuite.testcase.TestFactory;
+import org.evosuite.testcase.*;
 import org.evosuite.testcase.statements.FunctionalMockStatement;
 import org.evosuite.testcase.statements.PrimitiveStatement;
 import org.evosuite.testcase.variable.NullReference;
@@ -124,6 +121,12 @@ public class RandomInsertion implements InsertionStrategy {
 							+ var.getClassName());
 				}
 
+//				/** if the type of the variable is the same of the target class, and the test has already
+//				 * a call, do not add a new random call on the object */
+//				if (Properties.CUT_CALLS & var.getType().getTypeName() == Properties.TARGET_CLASS &&
+//						((DefaultTestCase)test).hasCall()
+//				)
+//					return 1;
 				success = TestFactory.getInstance().insertRandomCallOnObjectAt(test, var, position);
 			}
 
