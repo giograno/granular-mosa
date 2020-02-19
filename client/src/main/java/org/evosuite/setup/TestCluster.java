@@ -755,6 +755,8 @@ public class TestCluster {
 				.collect(Collectors.toList());
 		if (result.isEmpty())
 			return Randomness.choice(calls);
+		methodQueue.remove(result.get(0));
+		methodQueue.add(new MethodOccurrence(result.get(0).getKey(), result.get(0).getValue()+1));
 		return result.get(0).getKey();
 	}
 

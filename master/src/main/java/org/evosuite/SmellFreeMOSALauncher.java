@@ -14,7 +14,7 @@ public class SmellFreeMOSALauncher {
                 "-Dmap_CUT_calls=true",
                 "-Dassertions=FALSE",
                 "-Dsearch_budget=30",
-                "-Dclient_on_thread=false",
+                "-Dclient_on_thread=true",
                 "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals," +
                         "Generations,Statements_Executed,Fitness_Evaluations,Tests_Executed,Generations,Total_Time," +
                         "Size,Result_Size,Length,Result_Length,BranchCoverage",
