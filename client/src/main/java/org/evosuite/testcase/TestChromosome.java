@@ -304,6 +304,29 @@ public class TestChromosome extends ExecutableChromosome {
 	}
 
 	/**
+	 * Variant of a mutation that does not introduce eager test by design
+	 */
+	public void mutateET() {
+		boolean changed = false;
+		mutationHistory.clear();
+
+		if (Randomness.nextDouble() <= Properties.MUTATION_RATE) {
+			if (mutationChange())
+				changed = true;
+		}
+		if (changed) {
+			this.increaseNumberOfMutations();
+			setChanged(true);
+			test.clearCoveredGoals();
+		}
+		for (Statement s : test)
+			s.isValid();
+
+		assert ConstraintVerifier.verifyTest(test);
+		assert ! ConstraintVerifier.hasAnyOnlyForAssertionMethod(test);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
 	 * Each statement is mutated with probability 1/l

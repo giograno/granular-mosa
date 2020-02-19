@@ -215,7 +215,7 @@ public abstract class AbstractMOSA<T extends Chromosome> extends GeneticAlgorith
 	 * @return true if the test has at least one method or constructor call (i.e., the test may
 	 * cover something when executed; false otherwise
 	 */
-	private boolean hasMethodCall(T test){
+	protected boolean hasMethodCall(T test){
 		boolean flag = false;
 		TestCase tc = ((TestChromosome) test).getTestCase();
 		for (Statement s : tc){

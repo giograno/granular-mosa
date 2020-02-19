@@ -47,7 +47,6 @@ import org.evosuite.setup.*;
 import org.evosuite.testcase.jee.InjectionSupport;
 import org.evosuite.testcase.jee.InstanceOnlyOnce;
 import org.evosuite.testcase.jee.ServletSupport;
-import org.evosuite.testcase.mutation.NotSoRandomInsertion;
 import org.evosuite.testcase.mutation.RandomInsertion;
 import org.evosuite.testcase.statements.*;
 import org.evosuite.testcase.statements.environment.EnvironmentStatements;
@@ -2318,11 +2317,6 @@ public class TestFactory {
 	public int insertRandomStatement(TestCase test, int lastPosition) {
 		RandomInsertion rs = new RandomInsertion();
 		return rs.insertStatement(test, lastPosition);
-	}
-
-	public int insertNotReallyRandomStatement(TestCase test, int lastPosition) {
-		NotSoRandomInsertion insertion = new NotSoRandomInsertion();
-		return insertion.insertStatement(test, lastPosition);
 	}
 
 	/**

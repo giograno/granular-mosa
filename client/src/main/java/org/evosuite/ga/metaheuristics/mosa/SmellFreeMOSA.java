@@ -4,9 +4,8 @@ import org.evosuite.Properties;
 import org.evosuite.ga.Chromosome;
 import org.evosuite.ga.ChromosomeFactory;
 import org.evosuite.ga.ConstructionFailedException;
-import org.evosuite.ga.FitnessFunction;
 import org.evosuite.testcase.TestChromosome;
-import org.evosuite.testcase.TestFitnessFunction;
+import org.evosuite.testcase.statements.Statement;
 import org.evosuite.utils.Randomness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,146 +27,70 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
     }
 
     @Override
-    @SuppressWarnings("Duplicates")
-    /**
-     * Modified version of the breeding.
-     * The crossover is repeated till at least one of the two generated offsprings are smell free.
-     * The same is done for the newly randomly generated tests.
-     */
     protected List<T> breedNextGeneration() {
-        List<T> offspringPopulation = new ArrayList<>(Properties.POPULATION);
-
-        for (int i=0; i < Properties.POPULATION/2 && !isFinished(); i++) {
+        List<T> offspringPopulation = new ArrayList<T>(Properties.POPULATION);
+        for (int i=0; i < Properties.POPULATION/2 && !isFinished(); i++){
             T parent1 = selectionFunction.select(population);
             T parent2 = selectionFunction.select(population);
             T offspring1 = (T) parent1.clone();
             T offspring2 = (T) parent2.clone();
 
-            /* at least one offspring needs to not be smelly */
-            boolean isSmelly = true;
-
-            while (isSmelly) {
-                try {
-                    if (Randomness.nextDouble() <= Properties.CROSSOVER_RATE) {
-                        crossoverFunction.crossOver(offspring1, offspring2);
-                    }
-                } catch (ConstructionFailedException e) {
-                    logger.debug("CrossOver failed.");
-                    continue;
-                }
-
-                removeUnusedVariables(offspring1);
-                removeUnusedVariables(offspring2);
-
-                mutate(offspring1, parent1);
-                if (offspring1.isChanged()) {
-                    clearCachedResults(offspring1);
-                    offspring1.updateAge(currentIteration);
-                    calculateFitness(offspring1);
-                    if (offspring1.isSmellFree()) {
-                        offspringPopulation.add(offspring1);
-                        isSmelly = false;
-                    }
-                }
-
-                mutate(offspring2, parent2);
-                if (offspring2.isChanged()) {
-                    clearCachedResults(offspring2);
-                    offspring2.updateAge(currentIteration);
-                    calculateFitness(offspring2);
-                    if (offspring2.isSmellFree()) {
-                        offspringPopulation.add(offspring2);
-                        isSmelly = false;
-                    }
-                }
+            mutate(offspring1, parent1);
+            if (offspring1.isChanged()) {
+                clearCachedResults(offspring1);
+                offspring1.updateAge(currentIteration);
+                calculateFitness(offspring1);
+                offspringPopulation.add(offspring1);
+            }
+            mutate(offspring2, parent2);
+            if (offspring2.isChanged()) {
+                clearCachedResults(offspring2);
+                offspring2.updateAge(currentIteration);
+                calculateFitness(offspring2);
+                offspringPopulation.add(offspring2);
             }
         }
-        // Add new randomly generate tests
+
         for (int i = 0; i<Properties.POPULATION * Properties.P_TEST_INSERTION; i++){
             T tch;
-            do {
-                if (this.getCoveredGoals().size() == 0 || Randomness.nextBoolean()) {
-                    tch = this.chromosomeFactory.getChromosome();
-                    tch.setChanged(true);
-                } else {
-                    tch = (T) Randomness.choice(getArchive()).clone();
-                    tch.mutate();
-                    tch.mutate();
-                }
-                if (tch.isChanged()) {
-                    tch.updateAge(currentIteration);
-                    calculateFitness(tch);
-                    if (tch.isSmellFree())
-                        offspringPopulation.add(tch);
-                }
-            } while (!tch.isSmellFree());
+            if (this.getCoveredGoals().size() == 0 || Randomness.nextBoolean()){
+                tch = this.chromosomeFactory.getChromosome();
+                tch.setChanged(true);
+            } else {
+                tch = (T) Randomness.choice(getArchive()).clone();
+                tch.mutate(); tch.mutate();
+            }
+            if (tch.isChanged()) {
+                tch.updateAge(currentIteration);
+                calculateFitness(tch);
+                offspringPopulation.add(tch);
+            }
         }
         logger.info("Number of offsprings = {}", offspringPopulation.size());
         return offspringPopulation;
     }
 
-//    @Override
-//    public void initializePopulation() {
-//        notifySearchStarted();
-//        currentIteration = 0;
-//
-//        generateSmellyFreeInitialPopulation(Properties.POPULATION);
-//        calculateFitness();
-//        this.notifyIteration();
-//    }
-//
-//    /**
-//     * Generates an initial population that is free of eager test smell
-//     * @param sizePopulation the size of the population
-//     */
-//    private void generateSmellyFreeInitialPopulation(int sizePopulation) {
-//        int counter = 0;
-//        for (int i = 0; i < sizePopulation; i++) {
-//
-//            T individual;
-//
-//            do {
-//                individual = this.chromosomeFactory.getChromosome();
-//                calculateFitness(individual);
-//                counter++;
-//            } while (!individual.isSmellFree());
-//
-//            for (FitnessFunction<?> fitnessFunction : this.fitnessFunctions)
-//                individual.addFitness(fitnessFunction);
-//
-//            this.population.add(individual);
-//            if (isFinished())
-//                break;
-//        }
-//
-//        logger.debug("Size Archive = " + this.getArchive().size());
-//        logger.debug("generated " + counter + " for a population of size " + sizePopulation);
-//    }
+    protected void mutate(T offspring, T parent){
+        TestChromosome tch = (TestChromosome) offspring;
+        tch.mutateET();
+        if (!offspring.isChanged()) {
+            ((TestChromosome) offspring).mutateET();
+        }
+        if (!hasMethodCall(offspring)){
+            tch.setTestCase(((TestChromosome) parent).getTestCase().clone());
+            boolean changed = tch.mutationInsert();
+            if (changed){
+                for (Statement s : tch.getTestCase())
+                    s.isValid();
+            }
+            offspring.setChanged(changed);
+        }
+        notifyMutation(offspring);
+    }
 
     @Override
     protected void calculateFitness(T c) {
         super.calculateFitness(c);
         ((TestChromosome)c).computeEagerTest();
     }
-
-//    @Override
-//    /**
-//     * Modified version of the updateArchive method. A chromosome can be archived iff is not smelly
-//     */
-//    protected void updateArchive(T solution, FitnessFunction<T> covered) {
-//        TestChromosome tch = (TestChromosome) solution;
-//        tch.getTestCase().getCoveredGoals().add((TestFitnessFunction) covered);
-//
-//        if (archive.containsKey(covered)) {
-//            TestChromosome existingSolution = (TestChromosome) this.archive.get(covered);
-//            if (solution.compareSecondaryObjective(existingSolution) < 0 && tch.isSmellFree()) {
-//                this.archive.put(covered, solution);
-//            }
-//        } else {
-//            if (tch.isSmellFree()) {
-//                archive.put(covered, solution);
-//                this.uncoveredGoals.remove(covered);
-//            }
-//        }
-//    }
 }
