@@ -33,6 +33,7 @@ import org.evosuite.TestGenerationContext;
 import org.evosuite.ga.ConstructionFailedException;
 import org.evosuite.ga.archive.Archive;
 import org.evosuite.junit.CoverageAnalysis;
+import org.evosuite.runtime.Random;
 import org.evosuite.runtime.util.AtMostOnceLogger;
 import org.evosuite.runtime.util.Inputs;
 import org.evosuite.seeding.CastClassManager;
@@ -116,6 +117,19 @@ public class TestCluster {
 			Integer old = this.value;
 			this.value = value;
 			return old;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			MethodOccurrence that = (MethodOccurrence) o;
+			return Objects.equals(key, that.key);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(key);
 		}
 	}
 
@@ -703,10 +717,12 @@ public class TestCluster {
 	public GenericAccessibleObject<?> getRandomCallFor(GenericClass clazz, TestCase test, int position)
 	        throws ConstructionFailedException {
 
-		boolean hasCall = ((DefaultTestCase)test).hasCall();
+		/** if the algorithm is SMOSA and the number of call has been reached, do not add any method */
+		boolean hasCall = ((DefaultTestCase)test).hasCalls();
 		if (Properties.ALGORITHM == Properties.Algorithm.SMOSA &&
 				Properties.CUT_CALLS && clazz.getClassName() == Properties.TARGET_CLASS && hasCall)
 			return null;
+
 		Set<GenericAccessibleObject<?>> calls = getCallsFor(clazz, true);
 		Iterator<GenericAccessibleObject<?>> iter = calls.iterator();
 		while(iter.hasNext()) {
@@ -721,12 +737,25 @@ public class TestCluster {
 		}
 		logger.debug("Possible modifiers for " + clazz + ": " + calls);
 
+		/** if the class is the target class, get it from the queue */
+		if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && clazz.getClassName() == Properties.TARGET_CLASS)
+			return getCallFromQueue(calls);
+
 		GenericAccessibleObject<?> call = Randomness.choice(calls);
 		if (call.hasTypeParameters()) {
 			logger.debug("Modifier has type parameters");
 			call = call.getGenericInstantiation(clazz);
 		}
 		return call;
+	}
+
+	public GenericAccessibleObject<?> getCallFromQueue(Set<GenericAccessibleObject<?>> calls) {
+		List<MethodOccurrence> result = methodQueue.stream().filter(occ -> calls.contains(occ.getKey()))
+				.sorted(methodQueue.comparator())
+				.collect(Collectors.toList());
+		if (result.isEmpty())
+			return Randomness.choice(calls);
+		return result.get(0).getKey();
 	}
 
 	/**
@@ -1359,7 +1388,7 @@ public class TestCluster {
 		GenericAccessibleObject<?> choice;
 
 		if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && Properties.CUT_CALLS) {
-			boolean hasCall = ((DefaultTestCase)test).hasCall();
+			boolean hasCall = ((DefaultTestCase)test).hasCalls();
 			if (hasCall)
 //				return Randomness.choice(getConstructors(new ArrayList<>(testMethods)));
 				return null;

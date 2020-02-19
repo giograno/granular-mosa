@@ -1153,6 +1153,9 @@ public class Properties {
 	@Parameter(key = "map_CUT_calls", description = "Use a map to check with SUT call is already in the population")
 	public static boolean CUT_CALLS = false;
 
+	@Parameter(key = "no_et", description = "Number of calls for a test to be eager")
+	public static int NO_CALLS_ET = 1;
+
 	@Parameter(key = "sort_objects", description = "Sort objects in a test to make calls on objects closer to SUT more likely")
 	public static boolean SORT_OBJECTS = false;
 

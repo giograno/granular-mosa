@@ -2175,7 +2175,7 @@ public class TestFactory {
             }
 			GenericAccessibleObject<?> o = TestCluster.getInstance().getRandomTestCall(test);
 			if (o == null) {
-				logger.warn("Have no target methods to test");
+				logger.debug("Have no target methods to test");
 				return false;
 			} else if (o.isConstructor()) {
 
@@ -2220,7 +2220,8 @@ public class TestFactory {
 					// We only use this for static methods to avoid using wrong constructors (?)
 					addMethod(test, m, position, 0);
 				}
-				((DefaultTestCase)test).setWithCall(true);
+				/** increase the counter for the number of calls done to the target */
+				((DefaultTestCase)test).increaseCalls();
 			} else if (o.isField()) {
 				GenericField f = (GenericField) o;
 				name = f.getName();
@@ -2300,7 +2301,11 @@ public class TestFactory {
 				logger.debug("Chosen call {}", call);
 				if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && call == null)
 					return true;
-				return addCallFor(test, var, call, position);
+				boolean res = addCallFor(test, var, call, position);
+				/** in case the call was for the CUT and the insertion is successfull, increase the counter */
+				if (var.getGenericClass().getClassName() == Properties.TARGET_CLASS && res)
+					((DefaultTestCase)test).increaseCalls();
+				return res;
 			} catch (ConstructionFailedException e) {
 				logger.debug("Found no modifier: {}", e);
 			}

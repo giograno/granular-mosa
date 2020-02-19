@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.evosuite.Properties;
 import org.evosuite.assertion.Assertion;
 import org.evosuite.assertion.InspectorAssertion;
 import org.evosuite.assertion.PrimitiveFieldAssertion;
@@ -89,6 +90,8 @@ public class DefaultTestCase implements TestCase, Serializable {
 	private int id;
 
 	private boolean hasCall;
+
+	private int noCalls = 0;
 
 	/**
 	 * Constructor
@@ -1205,11 +1208,9 @@ public class DefaultTestCase implements TestCase, Serializable {
 
 	public ListenableList<Statement> getStatements() { return this.statements; }
 
-	public boolean hasCall() {
-		return hasCall;
-	}
+	public void increaseCalls() { noCalls++; }
 
-	public void setWithCall(boolean hasCall) {
-		this.hasCall = hasCall;
+	public boolean hasCalls() {
+		return noCalls >= Properties.NO_CALLS_ET;
 	}
 }
