@@ -89,9 +89,7 @@ public class DefaultTestCase implements TestCase, Serializable {
 
 	private int id;
 
-	private boolean hasCall;
-
-	private int noCalls = 0;
+	private int noCalls;
 
 	/**
 	 * Constructor
@@ -99,6 +97,7 @@ public class DefaultTestCase implements TestCase, Serializable {
 	public DefaultTestCase() {
 		statements = new ListenableList<>(new ArrayList<>());
 		id = idGenerator.getAndIncrement();
+		noCalls = 0;
 	}
 
 	public int getID(){
@@ -363,6 +362,7 @@ public class DefaultTestCase implements TestCase, Serializable {
 			copy.setRetval(s.getReturnValue().clone(t));
 			copy.setAssertions(s.copyAssertions(t, 0));
 		}
+		t.noCalls = noCalls;
 		t.coveredGoals.addAll(coveredGoals);
 		t.accessedEnvironment.copyFrom(accessedEnvironment);
 		t.isFailing = isFailing;

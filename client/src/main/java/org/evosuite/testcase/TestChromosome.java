@@ -509,7 +509,7 @@ public class TestChromosome extends ExecutableChromosome {
 	 *
 	 * @return
 	 */
-	private boolean mutationChange() {
+	public boolean mutationChange() {
 		boolean changed = false;
 		int lastMutatableStatement = getLastMutatableStatement();
 		double pl = 1d / (lastMutatableStatement + 1);

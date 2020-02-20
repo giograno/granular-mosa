@@ -10,7 +10,7 @@ public class SmellFreeMOSALauncher {
                 "-Dconfiguration_id=test",
                 "-Dminimize=FALSE",
                 "-Dpopulation=50",
-                "-Dalgorithm=SMOSA",
+                "-Dalgorithm=MOSA",
                 "-Dmap_CUT_calls=true",
                 "-Dassertions=FALSE",
                 "-Dsearch_budget=30",

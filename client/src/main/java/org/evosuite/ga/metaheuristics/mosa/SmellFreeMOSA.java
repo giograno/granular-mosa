@@ -58,7 +58,8 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
                 tch.setChanged(true);
             } else {
                 tch = (T) Randomness.choice(getArchive()).clone();
-                tch.mutate(); tch.mutate();
+                ((TestChromosome)tch).mutateET();
+                ((TestChromosome)tch).mutateET();
             }
             if (tch.isChanged()) {
                 tch.updateAge(currentIteration);
@@ -76,7 +77,7 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
         if (!offspring.isChanged()) {
             ((TestChromosome) offspring).mutateET();
         }
-        if (!hasMethodCall(offspring)){
+        if (!hasMethodCall(offspring)) {
             tch.setTestCase(((TestChromosome) parent).getTestCase().clone());
             boolean changed = tch.mutationInsert();
             if (changed){
@@ -91,6 +92,5 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
     @Override
     protected void calculateFitness(T c) {
         super.calculateFitness(c);
-//        ((TestChromosome)c).computeEagerTest();
     }
 }

@@ -2145,10 +2145,6 @@ public class TestFactory {
 		return -1;
 	}
 
-	public boolean insertCallNoEager(TestCase test, int position) {
-		return true;
-	}
-
 	/**
 	 * Insert a random call for the UUT at the given position
 	 *
