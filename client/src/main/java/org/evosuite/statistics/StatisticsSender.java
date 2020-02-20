@@ -95,10 +95,22 @@ public class StatisticsSender {
 
 		sendCoveredInfo(testSuite);
 		sendExceptionInfo(testSuite);
-		sendIndividualToMaster(testSuite);		
+		sendIndividualToMaster(testSuite);
+		sendEagerTestInformation(testSuite);
 	}
 
 	// -------- private methods ------------------------
+
+	private static void sendEagerTestInformation(TestSuiteChromosome testSuite) {
+		boolean isClean = true;
+		for (TestChromosome chromosome: testSuite.getTestChromosomes()) {
+			chromosome.computeEagerTest();
+			isClean = isClean && chromosome.isSmellFree();
+		}
+		ClientServices.getInstance().getClientNode().trackOutputVariable(
+				RuntimeVariable.EagerTest, isClean ? 1 : 0
+		);
+	}
 
 	private static void sendExceptionInfo(TestSuiteChromosome testSuite) {
 

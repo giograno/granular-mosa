@@ -381,7 +381,9 @@ public enum RuntimeVariable {
 	/* -------------------------------------------------------------------- */
 	/** Search budget needed to reach the maximum coverage */ 
 	/** Used in the comparison between LISP and MOSA */
-	Time2MaxCoverage
+	Time2MaxCoverage,
+	/** number of UUT calls to determine Eager Test */
+	EagerTest
 	
 	;
 	/* -------------------------------------------------- */

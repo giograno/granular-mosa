@@ -91,6 +91,6 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
     @Override
     protected void calculateFitness(T c) {
         super.calculateFitness(c);
-        ((TestChromosome)c).computeEagerTest();
+//        ((TestChromosome)c).computeEagerTest();
     }
 }
