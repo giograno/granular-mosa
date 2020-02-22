@@ -10,18 +10,18 @@ public class SmellFreeMOSALauncher {
                 "-Dconfiguration_id=test",
                 "-Dminimize=FALSE",
                 "-Dpopulation=50",
-                "-Dalgorithm=MOSA",
+                "-Dalgorithm=SMOSA",
                 "-Dmap_CUT_calls=true",
-                "-Dassertions=FALSE",
-                "-Dsearch_budget=30",
+                "-Dassertions=true",
+                "-Dsearch_budget=180",
                 "-Dclient_on_thread=false",
                 "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals," +
                         "Generations,Statements_Executed,Fitness_Evaluations,Tests_Executed,Generations,Total_Time," +
-                        "Size,Result_Size,Length,Result_Length,BranchCoverage,EagerTest",
+                        "Size,Result_Size,Length,Result_Length,BranchCoverage,NoEagerTest",
                 "-projectCP",
-                "/Users/grano/Documents/SF110/33_javaviewcontrol/javaviewcontrol.jar:/Users/grano/Documents/SF110/33_javaviewcontrol/lib/servlet.jar:/Users/grano/Documents/SF110/33_javaviewcontrol/lib/commons-fileupload-1.2.1.jar:/Users/grano/Documents/SF110/33_javaviewcontrol/lib/log4j-1.2.15.jar:/Users/grano/Documents/SF110/33_javaviewcontrol/lib/servlet-api.jar:/Users/grano/Documents/SF110/33_javaviewcontrol/lib/javacc.jar:/Users/grano/Documents/SF110/33_javaviewcontrol/lib/pmd.jar",
+                "/Users/grano/Documents/SF110/24_saxpath/saxpath.jar:/Users/grano/Documents/SF110/24_saxpath/lib/ant-1.3.jar:/Users/grano/Documents/SF110/24_saxpath/lib/xalan.jar:/Users/grano/Documents/SF110/24_saxpath/lib/xerces.jar:/Users/grano/Documents/SF110/24_saxpath/lib/jakarta-ant-1.3-optional.jar",
                 "-class",
-                "com.pmdesigns.jvc.tools.JVCParser"
+                "com.werken.saxpath.XPathLexer"
         };
 
         EvoSuite.main(command);

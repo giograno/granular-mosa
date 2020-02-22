@@ -108,7 +108,7 @@ public class StatisticsSender {
 			isClean = isClean && chromosome.isSmellFree();
 		}
 		ClientServices.getInstance().getClientNode().trackOutputVariable(
-				RuntimeVariable.EagerTest, isClean ? 1 : 0
+				RuntimeVariable.NoEagerTest, isClean ? 1 : 0
 		);
 	}
 
