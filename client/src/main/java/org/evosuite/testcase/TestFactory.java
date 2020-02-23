@@ -2297,7 +2297,7 @@ public class TestFactory {
 				if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && call == null)
 					return true;
 				boolean res = addCallFor(test, var, call, position);
-				/** in case the call was for the CUT and the insertion is successfull, increase the counter */
+				/** in case the call was for the CUT and the insertion is successful, increase the counter */
 				if (var.getGenericClass().getClassName() == Properties.TARGET_CLASS && res)
 					((DefaultTestCase)test).increaseCalls();
 				return res;

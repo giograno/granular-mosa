@@ -742,6 +742,13 @@ public class TestCluster {
 			return getCallFromQueue(calls);
 
 		GenericAccessibleObject<?> call = Randomness.choice(calls);
+
+		/** this should fix the fact problem with subclasses that calls a method from the superclass that is the CUT */
+//		if (call instanceof GenericMethod)
+//			if (hasCall && Properties.ALGORITHM == Properties.Algorithm.SMOSA
+//					&& call.getDeclaringClass().getName() == Properties.TARGET_CLASS)
+//				return null;
+
 		if (call.hasTypeParameters()) {
 			logger.debug("Modifier has type parameters");
 			call = call.getGenericInstantiation(clazz);

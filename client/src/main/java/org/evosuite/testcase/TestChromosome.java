@@ -785,7 +785,12 @@ public class TestChromosome extends ExecutableChromosome {
 						.map(s -> s.toString())
 						.collect(Collectors.toSet());
 
-		logger.debug("Number of methods found = " + methodStatements.size());
+//		logger.debug("Number of methods found = " + methodStatements.size());
+//		if (methodStatements.size() > 2) {
+//			logger.warn(this.test.toCode());
+//			for (String stmt: methodStatements)
+//				logger.warn(stmt);
+//		}
 		setSmellFree(methodStatements.size() <= Properties.NO_CALLS_ET);
 	}
 
