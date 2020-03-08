@@ -6,23 +6,24 @@ public class SmellFreeMOSALauncher {
 
         String[] command = {
                 "-generateMOSuite",
-//                "-Dcriterion=BRANCH",
+                "-Dcriterion=BRANCH",
                 "-Dconfiguration_id=test",
                 "-Dminimize=true",
                 "-Dpopulation=50",
-                "-Dalgorithm=SMOSA",
+                "-Dalgorithm=MOSA",
                 "-Dmap_CUT_calls=true",
-                "-Dassertions=true",
+                "-Dassertions=false",
                 "-Dno_et=1",
-                "-Dsearch_budget=30",
+                "-Dstopping_condition=MAXGENERATIONS",
+                "-Dsearch_budget=1",
                 "-Dclient_on_thread=false",
                 "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals," +
                         "Generations,Statements_Executed,Fitness_Evaluations,Tests_Executed,Generations,Total_Time," +
                         "Size,Result_Size,Length,Result_Length,BranchCoverage,NoEagerTest",
                 "-projectCP",
-                "/Users/grano/Documents/SF110/80_wheelwebtool/wheelwebtool.jar:/Users/grano/Documents/SF110/80_wheelwebtool/lib/slf4j-simple-1.4.3.jar:/Users/grano/Documents/SF110/80_wheelwebtool/lib/servlet-api-2.4.jar:/Users/grano/Documents/SF110/80_wheelwebtool/lib/xpp3-1.1.4c.jar:/Users/grano/Documents/SF110/80_wheelwebtool/lib/logback-classic-0.9.27.jar:/Users/grano/Documents/SF110/80_wheelwebtool/lib/commons-io-1.3.2.jar:/Users/grano/Documents/SF110/80_wheelwebtool/lib/mvel-1.3.2-java1.5.jar:/Users/grano/Documents/SF110/80_wheelwebtool/lib/commons-fileupload-1.2.jar:/Users/grano/Documents/SF110/80_wheelwebtool/lib/slf4j-api-1.5.8.jar",
+                "/Users/grano/Documents/SF110/107_weka/weka.jar:/Users/grano/Documents/SF110/107_weka/lib/packageManager.jar:/Users/grano/Documents/SF110/107_weka/lib/JFlex.jar:/Users/grano/Documents/SF110/107_weka/lib/java-cup.jar",
                 "-class",
-                "wheel.components.Component"
+                "weka.classifiers.bayes.net.search.ci.ICSSearchAlgorithm"
         };
 
         EvoSuite.main(command);

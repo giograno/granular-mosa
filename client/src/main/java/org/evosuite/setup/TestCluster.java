@@ -90,10 +90,11 @@ public class TestCluster {
     private EnvironmentTestClusterAugmenter environmentAugmenter;
 
     private PriorityQueue<MethodOccurrence> methodQueue;
+    private List<GenericAccessibleObject<?>> getterAndSetter;
 
     //-------------------------------------------------------------------
 
-	class MethodOccurrence implements Map.Entry<GenericAccessibleObject<?>, Integer> {
+	public class MethodOccurrence implements Map.Entry<GenericAccessibleObject<?>, Integer> {
 		private final GenericAccessibleObject<?> key;
 		private Integer value;
 
@@ -1401,6 +1402,11 @@ public class TestCluster {
 			if (hasCall)
 //				return Randomness.choice(getConstructors(new ArrayList<>(testMethods)));
 				return null;
+			/** with a given probability, if no calls have been inserted already, add a setter/getter */
+			if (Randomness.nextDouble() <= Properties.INSERTION_GETTER_SETTER)
+				if (!getterAndSetter.isEmpty())
+					return Randomness.choice(getterAndSetter);
+
 			MethodOccurrence poll = methodQueue.poll();
 			if (poll == null)
 				// if null there are no public method to test, hence, we return a call to a constructor!
@@ -1444,7 +1450,56 @@ public class TestCluster {
 		});
 		testMethods
 				.stream().filter(i -> i instanceof GenericMethod)
+				.filter(i -> !isSetterOrGetter((GenericMethod) i))
 				.forEach(m -> methodQueue.add(new MethodOccurrence(m, 0)));
+	}
+
+	/**
+	 * Checks if a method is a getter of a setter (based on name matching).
+	 * If founds a setter, adds it to the lists of setters and getters
+	 * @param method
+	 * @return
+	 */
+	private boolean isSetterOrGetter(GenericMethod method) {
+		if (getterAndSetter == null)
+			getterAndSetter = new ArrayList<>();
+		if (method.getMethod().getName().startsWith("set")) {
+			String lookFor = method.getMethod().getName().replace("set", "get");
+			if (findCounterpart(lookFor)) {
+				getterAndSetter.add(method);
+				return true;
+			}
+		}
+		if (method.getMethod().getName().startsWith("get")) {
+			String lookFor = method.getMethod().getName().replace("get", "set");
+			if (findCounterpart(lookFor)) {
+				getterAndSetter.add(method);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean findCounterpart(String methodName) {
+		for (GenericAccessibleObject m: testMethods) {
+			if (m instanceof GenericMethod) {
+				String temp = ((GenericMethod) m).getMethod().getName();
+				if (((GenericMethod) m).getMethod().getName().equals(methodName))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if a method is in the list of getters and setters
+	 * @param method the method to check
+	 * @return true if the method is a getter or a setter; false otherwise
+	 */
+	public boolean isGetterAndSetter(GenericAccessibleObject<?> method) {
+		if (this.getterAndSetter.isEmpty())
+			return false;
+		return this.getterAndSetter.contains(method);
 	}
 
 	public int getNumTestCalls() {

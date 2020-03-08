@@ -782,6 +782,8 @@ public class TestChromosome extends ExecutableChromosome {
 		Set<String> methodStatements = statements.stream().filter(s -> s instanceof MethodStatement)
 				.filter(s -> ((MethodStatement) s).getMethod().getMethod()
 						.getDeclaringClass().getName() == Properties.TARGET_CLASS)
+				/** do not count getters and setters */
+				.filter(s -> !TestCluster.getInstance().isGetterAndSetter(((MethodStatement) s).getMethod()))
 						.map(s -> s.toString())
 						.collect(Collectors.toSet());
 

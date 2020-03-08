@@ -17,15 +17,7 @@
  */
 package org.evosuite.ga.metaheuristics.mosa;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.evosuite.ProgressMonitor;
 import org.evosuite.Properties;
@@ -49,6 +41,7 @@ import org.evosuite.ga.metaheuristics.GeneticAlgorithm;
 import org.evosuite.ga.metaheuristics.SearchListener;
 import org.evosuite.ga.metaheuristics.mosa.comparators.MOSADominanceComparator;
 import org.evosuite.ga.operators.selection.SelectionFunction;
+import org.evosuite.setup.TestCluster;
 import org.evosuite.testcase.TestCase;
 import org.evosuite.testcase.TestChromosome;
 import org.evosuite.testcase.TestFitnessFunction;
@@ -384,6 +377,7 @@ public abstract class AbstractMOSA<T extends Chromosome> extends GeneticAlgorith
 			next_front.add(p);
 			next_front.removeAll(dominatedSolutions);
 		}
+		logger.warn("Size of the non dominated front: " + next_front.size());
 		return next_front;
 	}
 
@@ -423,6 +417,7 @@ public abstract class AbstractMOSA<T extends Chromosome> extends GeneticAlgorith
 		generateInitialPopulation(Properties.POPULATION);
 		// Determine fitness
 		calculateFitness();
+		PriorityQueue<TestCluster.MethodOccurrence> methodQueue = TestCluster.getInstance().getMethodQueue();
 		this.notifyIteration();
 	}
 

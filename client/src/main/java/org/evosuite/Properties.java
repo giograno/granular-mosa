@@ -249,6 +249,10 @@ public class Properties {
 	@Parameter(key = "insertion_score_uut", group = "Test Creation", description = "Score for selection of insertion of UUT calls")
 	public static int INSERTION_SCORE_UUT = 1;
 
+	@Parameter(key = "insertion_getter_setter", group = "Test Creation", description = "Score for the insertion of a " +
+			"setter of getter in a test")
+	public static double INSERTION_GETTER_SETTER = 0.25;
+
 	@Parameter(key = "insertion_uut", group = "Test Creation", description = "Score for selection of insertion of UUT calls")
 	public static double INSERTION_UUT = 0.5;
 
