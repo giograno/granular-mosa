@@ -94,6 +94,7 @@ public class TestCluster {
 
     //-------------------------------------------------------------------
 
+	/** implementation of the priority queue */
 	public class MethodOccurrence implements Map.Entry<GenericAccessibleObject<?>, Integer> {
 		private final GenericAccessibleObject<?> key;
 		private Integer value;

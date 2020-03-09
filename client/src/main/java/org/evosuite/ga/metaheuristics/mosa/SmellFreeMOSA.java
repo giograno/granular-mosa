@@ -24,6 +24,7 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
      */
     public SmellFreeMOSA(ChromosomeFactory<T> factory) {
         super(factory);
+
     }
 
     @Override
