@@ -758,15 +758,17 @@ public class TestCluster {
 		return call;
 	}
 
+	/**
+	 * First sees if there is a call to the class available. If not, just returns a random call;
+	 * Otherwise, sort the calls by number of possible reachable non-covered targets and return it
+	 */
 	public GenericAccessibleObject<?> getCallFromQueue(Set<GenericAccessibleObject<?>> calls) {
 		List<MethodOccurrence> result = methodQueue.stream().filter(occ -> calls.contains(occ.getKey()))
 				.sorted(methodQueue.comparator())
 				.collect(Collectors.toList());
 		if (result.isEmpty())
 			return Randomness.choice(calls);
-		methodQueue.remove(result.get(0));
-		methodQueue.add(new MethodOccurrence(result.get(0).getKey(), result.get(0).getValue()+1));
-		return result.get(0).getKey();
+		return ListUtil.selectRankBiased(sortCalls(new ArrayList<>(calls)));
 	}
 
 	/**
@@ -1401,21 +1403,18 @@ public class TestCluster {
 		if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && Properties.CUT_CALLS) {
 			boolean hasCall = ((DefaultTestCase)test).hasCalls();
 			if (hasCall)
-//				return Randomness.choice(getConstructors(new ArrayList<>(testMethods)));
 				return null;
 			/** with a given probability, if no calls have been inserted already, add a setter/getter */
 			if (Randomness.nextDouble() <= Properties.INSERTION_GETTER_SETTER)
 				if (!getterAndSetter.isEmpty())
 					return Randomness.choice(getterAndSetter);
 
-			MethodOccurrence poll = methodQueue.poll();
-			if (poll == null)
-				// if null there are no public method to test, hence, we return a call to a constructor!
-				return Randomness.choice(candidateTestMethods);
-			choice = poll.getKey();
-			methodQueue.add(new MethodOccurrence(poll.key, poll.value+1));
+			/** if no getter or setter is selected, we use the select rank bias*/
+			choice = Properties.SORT_CALLS ? ListUtil.selectRankBiased(candidateTestMethods)
+					: Randomness.choice(candidateTestMethods);
 		} else {
-			choice = Properties.SORT_CALLS ? ListUtil.selectRankBiased(candidateTestMethods) : Randomness.choice(candidateTestMethods);
+			choice = Properties.SORT_CALLS ? ListUtil.selectRankBiased(candidateTestMethods)
+					: Randomness.choice(candidateTestMethods);
 		}
 		logger.debug("Chosen call: " + choice);
 		if (choice.getOwnerClass().hasWildcardOrTypeVariables()) {
