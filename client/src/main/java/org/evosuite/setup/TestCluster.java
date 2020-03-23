@@ -768,7 +768,11 @@ public class TestCluster {
 				.collect(Collectors.toList());
 		if (result.isEmpty())
 			return Randomness.choice(calls);
-		return ListUtil.selectRankBiased(sortCalls(new ArrayList<>(calls)));
+		/** keep only methods and constructors (filter out the fields) */
+		List<GenericAccessibleObject<?>> targets = calls.stream().
+				filter(c -> c.isMethod() || c.isConstructor())
+				.collect(Collectors.toList());
+		return ListUtil.selectRankBiased(sortCalls(targets));
 	}
 
 	/**
