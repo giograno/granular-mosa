@@ -29,7 +29,7 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
 
     @Override
     protected List<T> breedNextGeneration() {
-        List<T> offspringPopulation = new ArrayList<T>(Properties.POPULATION);
+        List<T> offspringPopulation = new ArrayList<>(Properties.POPULATION);
         for (int i=0; i < Properties.POPULATION/2 && !isFinished(); i++){
             T parent1 = selectionFunction.select(population);
             T parent2 = selectionFunction.select(population);
@@ -79,6 +79,7 @@ public class SmellFreeMOSA <T extends Chromosome> extends MOSA<T> {
             ((TestChromosome) offspring).mutateET();
         }
         if (!hasMethodCall(offspring)) {
+            // this should never be the case, right?
             tch.setTestCase(((TestChromosome) parent).getTestCase().clone());
             boolean changed = tch.mutationInsert();
             if (changed){
