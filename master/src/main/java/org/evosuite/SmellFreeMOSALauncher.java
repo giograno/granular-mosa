@@ -8,15 +8,15 @@ public class SmellFreeMOSALauncher {
                 "-generateMOSuite",
                 "-Dcriterion=BRANCH",
                 "-Dconfiguration_id=test",
-                "-Dminimize=true",
+                "-Dminimize=false",
                 "-Dpopulation=50",
-                "-Dalgorithm=SMOSA",
+                "-Dalgorithm=MOSA",
                 "-Dsort_calls=true",
                 "-Dmap_CUT_calls=true",
                 "-Dassertions=false",
                 "-Dno_et=1",
                 "-Dstopping_condition=MAXGENERATIONS",
-                "-Dsearch_budget=10",
+                "-Dsearch_budget=1",
                 "-Dclient_on_thread=true",
                 "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals," +
                         "Generations,Statements_Executed,Fitness_Evaluations,Tests_Executed,Generations,Total_Time," +
