@@ -417,7 +417,6 @@ public abstract class AbstractMOSA<T extends Chromosome> extends GeneticAlgorith
 		generateInitialPopulation(Properties.POPULATION);
 		// Determine fitness
 		calculateFitness();
-		PriorityQueue<TestCluster.MethodOccurrence> methodQueue = TestCluster.getInstance().getMethodQueue();
 		this.notifyIteration();
 	}
 

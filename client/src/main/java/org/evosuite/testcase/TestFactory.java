@@ -2216,7 +2216,7 @@ public class TestFactory {
 					addMethod(test, m, position, 0);
 				}
 				/** increase the counter for the number of calls done to the target */
-				if (!TestCluster.getInstance().isGetterAndSetter(m))
+				if (!TestCluster.getInstance().isSetterMethod(m))
 					((DefaultTestCase)test).increaseCalls();
 			} else if (o.isField()) {
 				GenericField f = (GenericField) o;
@@ -2300,7 +2300,7 @@ public class TestFactory {
 				boolean res = addCallFor(test, var, call, position);
 				/** in case the call was for the CUT and the insertion is successful, increase the counter */
 				if (var.getGenericClass().getClassName() == Properties.TARGET_CLASS && res)
-					if (!TestCluster.getInstance().isGetterAndSetter(call))
+					if (!TestCluster.getInstance().isSetterMethod(call))
 						((DefaultTestCase)test).increaseCalls();
 				return res;
 			} catch (ConstructionFailedException e) {

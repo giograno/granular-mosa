@@ -34,7 +34,6 @@ import org.evosuite.symbolic.BranchCondition;
 import org.evosuite.symbolic.ConcolicExecution;
 import org.evosuite.symbolic.ConcolicMutation;
 import org.evosuite.testcase.execution.ExecutionResult;
-import org.evosuite.testcase.execution.ExecutionTrace;
 import org.evosuite.testcase.localsearch.TestCaseLocalSearch;
 import org.evosuite.testcase.statements.FunctionalMockStatement;
 import org.evosuite.testcase.statements.MethodStatement;
@@ -783,7 +782,7 @@ public class TestChromosome extends ExecutableChromosome {
 				.filter(s -> ((MethodStatement) s).getMethod().getMethod()
 						.getDeclaringClass().getName() == Properties.TARGET_CLASS)
 				/** do not count getters and setters */
-				.filter(s -> !TestCluster.getInstance().isGetterAndSetter(((MethodStatement) s).getMethod()))
+				.filter(s -> !TestCluster.getInstance().isSetterMethod(((MethodStatement) s).getMethod()))
 						.map(s -> s.toString())
 						.collect(Collectors.toSet());
 

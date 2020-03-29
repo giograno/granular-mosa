@@ -27,13 +27,13 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import org.evosuite.Properties;
 import org.evosuite.TestGenerationContext;
 import org.evosuite.ga.ConstructionFailedException;
 import org.evosuite.ga.archive.Archive;
 import org.evosuite.junit.CoverageAnalysis;
-import org.evosuite.runtime.Random;
 import org.evosuite.runtime.util.AtMostOnceLogger;
 import org.evosuite.runtime.util.Inputs;
 import org.evosuite.seeding.CastClassManager;
@@ -89,63 +89,16 @@ public class TestCluster {
 
     private EnvironmentTestClusterAugmenter environmentAugmenter;
 
-    private PriorityQueue<MethodOccurrence> methodQueue;
-    private List<GenericAccessibleObject<?>> getterAndSetter;
+    /** list of setters that can be added to the chromosome before a call at any time */
+	private List<GenericAccessibleObject<?>> setterMethods;
+	/** all methods that are not constructors and that are not setters */
+	private List<GenericAccessibleObject<?>> candidateMethods;
 
     //-------------------------------------------------------------------
-
-	/** implementation of the priority queue */
-	public class MethodOccurrence implements Map.Entry<GenericAccessibleObject<?>, Integer> {
-		private final GenericAccessibleObject<?> key;
-		private Integer value;
-
-		public MethodOccurrence(GenericAccessibleObject<?> key, Integer value) {
-			this.key = key;
-			this.value = value;
-		}
-
-		@Override
-		public GenericAccessibleObject<?> getKey() {
-			return key;
-		}
-
-		@Override
-		public Integer getValue() {
-			return value;
-		}
-
-		@Override
-		public Integer setValue(Integer value) {
-			Integer old = this.value;
-			this.value = value;
-			return old;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			MethodOccurrence that = (MethodOccurrence) o;
-			return Objects.equals(key, that.key);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(key);
-		}
-	}
 
     protected TestCluster(){
         environmentAugmenter = new EnvironmentTestClusterAugmenter(this);
 		environmentMethods = new LinkedHashSet<>();
-	}
-
-	/**
-	 * Returns a map with methods that have been placed in the population
-	 * @return
-	 */
-	public PriorityQueue<MethodOccurrence> getMethodQueue() {
-		return methodQueue;
 	}
 
 	/**
@@ -739,13 +692,12 @@ public class TestCluster {
 		}
 		logger.debug("Possible modifiers for " + clazz + ": " + calls);
 
-		/** if the class is the target class, get it from the queue */
-		if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && clazz.getClassName() == Properties.TARGET_CLASS)
-			return getCallFromQueue(calls);
+		if (SMOSACustomization() && clazz.getClassName() == Properties.TARGET_CLASS)
+			return getCandidateMethodCall(calls);
 
 		GenericAccessibleObject<?> call = Randomness.choice(calls);
 
-		/** this should fix the fact problem with subclasses that calls a method from the superclass that is the CUT */
+		// todo: we should fix the problem with subclasses that calls a method of the CUT superclass
 //		if (call instanceof GenericMethod)
 //			if (hasCall && Properties.ALGORITHM == Properties.Algorithm.SMOSA
 //					&& call.getDeclaringClass().getName() == Properties.TARGET_CLASS)
@@ -761,18 +713,17 @@ public class TestCluster {
 	/**
 	 * First sees if there is a call to the class available. If not, just returns a random call;
 	 * Otherwise, sort the calls by number of possible reachable non-covered targets and return it
+	 * todo:gio refactor. Save an instance variable of all callable methods that are not constructors or setters and
+	 * call from there
+	 * it could also return a field call! Should fields be called?
 	 */
-	public GenericAccessibleObject<?> getCallFromQueue(Set<GenericAccessibleObject<?>> calls) {
-		List<MethodOccurrence> result = methodQueue.stream().filter(occ -> calls.contains(occ.getKey()))
-				.sorted(methodQueue.comparator())
-				.collect(Collectors.toList());
-		if (result.isEmpty())
+	public GenericAccessibleObject<?> getCandidateMethodCall(Set<GenericAccessibleObject<?>> calls) {
+		Random random = new Random();
+		if (random.nextDouble() <= 0.33 || candidateMethods.isEmpty()) {
 			return Randomness.choice(calls);
-		/** keep only methods and constructors (filter out the fields) */
-		List<GenericAccessibleObject<?>> targets = calls.stream().
-				filter(c -> c.isMethod() || c.isConstructor())
-				.collect(Collectors.toList());
-		return ListUtil.selectRankBiased(sortCalls(targets));
+		} else {
+			return ListUtil.selectRankBiased(sortCalls(candidateMethods));
+		}
 	}
 
 	/**
@@ -1374,7 +1325,8 @@ public class TestCluster {
 	}
 
 	/**
-	 * Get random method or constructor of unit under test
+	 * Get random method or constructor of unit under test.
+	 * Contains customization for SMOSA
 	 *
 	 * @return
 	 * @throws ConstructionFailedException
@@ -1397,29 +1349,30 @@ public class TestCluster {
 				candidateTestMethods = new ArrayList<>(testMethods);
 		}
 
-
 		if(Properties.SORT_CALLS) {
 			candidateTestMethods = sortCalls(candidateTestMethods);
 		}
 
 		GenericAccessibleObject<?> choice;
 
-		if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && Properties.CUT_CALLS) {
+		if (SMOSACustomization()) {
+			// number of calls already achieved: this should not happen (stopped in the random insertion class).
 			boolean hasCall = ((DefaultTestCase)test).hasCalls();
 			if (hasCall)
 				return null;
-			/** with a given probability, if no calls have been inserted already, add a setter/getter */
-			if (Randomness.nextDouble() <= Properties.INSERTION_GETTER_SETTER)
-				if (!getterAndSetter.isEmpty())
-					return Randomness.choice(getterAndSetter);
 
-			/** if no getter or setter is selected, we use the select rank bias*/
-			choice = Properties.SORT_CALLS ? ListUtil.selectRankBiased(candidateTestMethods)
-					: Randomness.choice(candidateTestMethods);
-		} else {
-			choice = Properties.SORT_CALLS ? ListUtil.selectRankBiased(candidateTestMethods)
-					: Randomness.choice(candidateTestMethods);
+			// return a setter with a given probability
+			if (Randomness.nextDouble() <= Properties.INSERTION_SETTER)
+				if (!setterMethods.isEmpty())
+					return Randomness.choice(setterMethods);
+
+			// using candidate methods if not empty list
+			if (!candidateMethods.isEmpty())
+				candidateTestMethods = candidateMethods;
 		}
+		choice = Properties.SORT_CALLS ? ListUtil.selectRankBiased(candidateTestMethods)
+				: Randomness.choice(candidateTestMethods);
+
 		logger.debug("Chosen call: " + choice);
 		if (choice.getOwnerClass().hasWildcardOrTypeVariables()) {
 			GenericClass concreteClass = choice.getOwnerClass().getGenericInstantiation();
@@ -1440,70 +1393,68 @@ public class TestCluster {
 	}
 
 	/**
-	 * to be called after all the methods have been added to teh list of test methods
+	 * Flag for the SMOSA customizations
 	 */
-	public void fillPriorityQueueOfCalls() {
-		assert testMethods.size() != 0;
-		methodQueue = new PriorityQueue<>((o1, o2) -> {
-			if (o1.value < o2.value)
-				return -1;
-			else if (o1.value > o2.value)
-				return 1;
-			else
-				return 0;
-		});
-		testMethods
-				.stream().filter(i -> i instanceof GenericMethod)
-				.filter(i -> !isSetterOrGetter((GenericMethod) i))
-				.forEach(m -> methodQueue.add(new MethodOccurrence(m, 0)));
+	public boolean SMOSACustomization() {
+		return Properties.ALGORITHM == Properties.Algorithm.SMOSA && Properties.CUT_CALLS;
 	}
 
 	/**
-	 * Checks if a method is a getter of a setter (based on name matching).
-	 * If founds a setter, adds it to the lists of setters and getters
-	 * @param method
-	 * @return
+	 * Computes the list of the setters methods for the CUT and the list of candidate methods, i.e., the methods
+	 * that are neither constructors or setters. Called by {@link TestClusterGenerator}.
 	 */
-	private boolean isSetterOrGetter(GenericMethod method) {
-		if (getterAndSetter == null)
-			getterAndSetter = new ArrayList<>();
-		if (method.getMethod().getName().startsWith("set")) {
-			String lookFor = method.getMethod().getName().replace("set", "get");
-			if (findCounterpart(lookFor)) {
-				getterAndSetter.add(method);
-				return true;
-			}
-		}
-		if (method.getMethod().getName().startsWith("get")) {
-			String lookFor = method.getMethod().getName().replace("get", "set");
-			if (findCounterpart(lookFor)) {
-				getterAndSetter.add(method);
-				return true;
-			}
-		}
-		return false;
-	}
+	public void computeSettersAndCandidateMethods() {
+		if (setterMethods == null)
+			setterMethods = new ArrayList<>();
 
-	private boolean findCounterpart(String methodName) {
-		for (GenericAccessibleObject m: testMethods) {
-			if (m instanceof GenericMethod) {
-				String temp = ((GenericMethod) m).getMethod().getName();
-				if (((GenericMethod) m).getMethod().getName().equals(methodName))
-					return true;
+		LevenshteinDistance distance = new LevenshteinDistance();
+
+		// we include amongst the setters all the methods that starts with "set"
+		setterMethods.addAll(testMethods.stream()
+				.filter(tm -> tm instanceof GenericMethod)
+				.map(GenericMethod.class::cast)
+				.filter(tm -> tm.getMethod().getName().startsWith("set"))
+				.collect(Collectors.toList()));
+
+		// filter the method call and exclude the setters already found
+		List<GenericMethod> methodCalls = testMethods.stream()
+				.filter(tm -> tm instanceof GenericMethod)
+				.filter(tm -> !setterMethods.contains(tm))
+				.map(GenericMethod.class::cast)
+				.collect(Collectors.toList());
+
+		// check each pair. if the distance is leq than 3 and one of the two methods contains "get", the
+		// other method of the pair is considered to be a setter
+		for (int i = 0; i < methodCalls.size(); i++) {
+			GenericMethod m = methodCalls.get(i);
+			for (int j = i+1; j < methodCalls.size(); j++) {
+				GenericMethod n = methodCalls.get(j);
+				int d = distance.apply(m.getMethod().getName(), n.getMethod().getName());
+				if (d <= 3) {
+					if (m.getMethod().getName().toLowerCase().contains("get"))
+						setterMethods.add(n);
+					else if (n.getMethod().getName().toLowerCase().contains("get"))
+						setterMethods.add(m);
+				}
 			}
 		}
-		return false;
+
+		// compute candidate methods, i.e., methods that are not constructors or setters
+		candidateMethods = testMethods.stream()
+				.filter(m -> !m.isConstructor())
+				.filter(m -> !setterMethods.contains(m))
+				.collect(Collectors.toList());
 	}
 
 	/**
-	 * Checks if a method is in the list of getters and setters
+	 * Checks if a method is in the list of setters
 	 * @param method the method to check
-	 * @return true if the method is a getter or a setter; false otherwise
+	 * @return true if the method is a setter; false otherwise
 	 */
-	public boolean isGetterAndSetter(GenericAccessibleObject<?> method) {
-		if (this.getterAndSetter.isEmpty())
+	public boolean isSetterMethod(GenericAccessibleObject<?> method) {
+		if (this.setterMethods.isEmpty())
 			return false;
-		return this.getterAndSetter.contains(method);
+		return this.setterMethods.contains(method);
 	}
 
 	public int getNumTestCalls() {
