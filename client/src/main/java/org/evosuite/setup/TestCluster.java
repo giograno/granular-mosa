@@ -44,10 +44,7 @@ import org.evosuite.testcase.TestCase;
 import org.evosuite.testcase.jee.InstanceOnlyOnce;
 import org.evosuite.testcase.variable.VariableReference;
 import org.evosuite.utils.ListUtil;
-import org.evosuite.utils.generic.GenericAccessibleObject;
-import org.evosuite.utils.generic.GenericClass;
-import org.evosuite.utils.generic.GenericConstructor;
-import org.evosuite.utils.generic.GenericMethod;
+import org.evosuite.utils.generic.*;
 import org.evosuite.utils.Randomness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -692,10 +689,15 @@ public class TestCluster {
 		}
 		logger.debug("Possible modifiers for " + clazz + ": " + calls);
 
-		if (SMOSACustomization() && clazz.getClassName() == Properties.TARGET_CLASS)
-			return getCandidateMethodCall(calls);
+		GenericAccessibleObject<?> call;
+		if (SMOSACustomization() && clazz.getClassName() == Properties.TARGET_CLASS) {
+			call = getCandidateMethodCall(calls);
+			if (call.hasTypeParameters())
+				call = call.getGenericInstantiation(clazz);
+			return call;
+		}
 
-		GenericAccessibleObject<?> call = Randomness.choice(calls);
+		call = Randomness.choice(calls);
 
 		// todo: we should fix the problem with subclasses that calls a method of the CUT superclass
 //		if (call instanceof GenericMethod)
@@ -709,6 +711,8 @@ public class TestCluster {
 		}
 		return call;
 	}
+
+
 
 	/**
 	 * First sees if there is a call to the class available. If not, just returns a random call;
@@ -1001,7 +1005,7 @@ public class TestCluster {
 	 * @return
 	 */
 	public Set<GenericAccessibleObject<?>> getModifiers() {
-		Set<GenericAccessibleObject<?>> calls = new LinkedHashSet<GenericAccessibleObject<?>>();
+		Set<GenericAccessibleObject<?>> calls = new LinkedHashSet<>();
 		for (Set<GenericAccessibleObject<?>> modifierCalls : modifiers.values())
 			calls.addAll(modifierCalls);
 
@@ -1407,43 +1411,43 @@ public class TestCluster {
 		if (setterMethods == null)
 			setterMethods = new ArrayList<>();
 
-		LevenshteinDistance distance = new LevenshteinDistance();
+		Set<GenericAccessibleObject<?>> modifiers = getModifiers();
 
 		// we include amongst the setters all the methods that starts with "set"
-		setterMethods.addAll(testMethods.stream()
+		setterMethods.addAll(modifiers.stream()
 				.filter(tm -> tm instanceof GenericMethod)
 				.map(GenericMethod.class::cast)
-				.filter(tm -> tm.getMethod().getName().startsWith("set"))
+				.filter(tm -> tm.getMethod().getName().startsWith("set") ||
+						isSetterName(tm.getMethod().getName(), "Set") ||
+						isSetterName(tm.getMethod().getName(), "Add") ||
+						isSetterName(tm.getMethod().getName(), "Put"))
 				.collect(Collectors.toList()));
-
-		// filter the method call and exclude the setters already found
-		List<GenericMethod> methodCalls = testMethods.stream()
-				.filter(tm -> tm instanceof GenericMethod)
-				.filter(tm -> !setterMethods.contains(tm))
-				.map(GenericMethod.class::cast)
-				.collect(Collectors.toList());
-
-		// check each pair. if the distance is leq than 3 and one of the two methods contains "get", the
-		// other method of the pair is considered to be a setter
-		for (int i = 0; i < methodCalls.size(); i++) {
-			GenericMethod m = methodCalls.get(i);
-			for (int j = i+1; j < methodCalls.size(); j++) {
-				GenericMethod n = methodCalls.get(j);
-				int d = distance.apply(m.getMethod().getName(), n.getMethod().getName());
-				if (d <= 3) {
-					if (m.getMethod().getName().toLowerCase().contains("get"))
-						setterMethods.add(n);
-					else if (n.getMethod().getName().toLowerCase().contains("get"))
-						setterMethods.add(m);
-				}
-			}
-		}
 
 		// compute candidate methods, i.e., methods that are not constructors or setters
 		candidateMethods = testMethods.stream()
 				.filter(m -> !m.isConstructor())
 				.filter(m -> !setterMethods.contains(m))
 				.collect(Collectors.toList());
+
+		// add the fields to the setters
+		setterMethods.addAll(modifiers.stream()
+				.filter(tm -> tm instanceof GenericField)
+				.collect(Collectors.toList()));
+	}
+
+	private boolean isSetterName(String name, String pattern) {
+		try {
+			if (name.contains(pattern)) {
+				int index = name.indexOf(pattern);
+				if (name.length() - 1 >= index + 3) {
+					if (Character.isUpperCase(name.charAt(index + 1)))
+						return true;
+				}
+			}
+			return false;
+		} catch (IndexOutOfBoundsException e) {} finally {
+			return false;
+		}
 	}
 
 	/**
