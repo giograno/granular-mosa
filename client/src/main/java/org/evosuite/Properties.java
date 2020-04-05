@@ -250,7 +250,7 @@ public class Properties {
 	public static int INSERTION_SCORE_UUT = 1;
 
 	@Parameter(key = "insertion_setter", group = "Test Creation", description = "Score for the insertion of a setter in a test")
-	public static double INSERTION_SETTER = 0.25;
+	public static double INSERTION_SETTER = 0.33;
 
 	@Parameter(key = "insertion_uut", group = "Test Creation", description = "Score for selection of insertion of UUT calls")
 	public static double INSERTION_UUT = 0.5;
