@@ -81,21 +81,21 @@ public class MOSuiteStrategy extends TestGenerationStrategy {
 		// executed with -prefix!
 		
 //		List<TestFitnessFunction> goals = getGoals(true);
-		
+
 		if (Properties.ALGORITHM == Properties.Algorithm.LIPS)
 			LoggingUtils.getEvoLogger().info("* Total number of test goals for LIPS: {}", fitnessFunctions.size());
 		else if (Properties.ALGORITHM == Properties.Algorithm.MOSA)
 			LoggingUtils.getEvoLogger().info("* Total number of test goals for MOSA: {}", fitnessFunctions.size());
-		
+
 //		ga.setChromosomeFactory(getChromosomeFactory(fitnessFunctions.get(0))); // FIXME: just one fitness function?
 
 //		if (Properties.SHOW_PROGRESS && !logger.isInfoEnabled())
 //			ga.addListener(progressMonitor); // FIXME progressMonitor may cause
 
-		if (ArrayUtil.contains(Properties.CRITERION, Criterion.DEFUSE) || 
-				ArrayUtil.contains(Properties.CRITERION, Criterion.ALLDEFS) || 
-				ArrayUtil.contains(Properties.CRITERION, Criterion.STATEMENT) || 
-				ArrayUtil.contains(Properties.CRITERION, Criterion.RHO) || 
+		if (ArrayUtil.contains(Properties.CRITERION, Criterion.DEFUSE) ||
+				ArrayUtil.contains(Properties.CRITERION, Criterion.ALLDEFS) ||
+				ArrayUtil.contains(Properties.CRITERION, Criterion.STATEMENT) ||
+				ArrayUtil.contains(Properties.CRITERION, Criterion.RHO) ||
 				ArrayUtil.contains(Properties.CRITERION, Criterion.BRANCH) ||
 				ArrayUtil.contains(Properties.CRITERION, Criterion.AMBIGUITY))
 			ExecutionTracer.enableTraceCalls();

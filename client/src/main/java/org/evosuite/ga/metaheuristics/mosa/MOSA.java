@@ -190,7 +190,6 @@ public class MOSA<T extends Chromosome> extends AbstractMOSA<T> {
 		//initialize population
 		if (population.isEmpty())
 			initializePopulation();
-		logger.warn("\nsize population = " + this.population.size());
 		// Calculate dominance ranks and crowding distance
 		ranking.computeRankingAssignment(population, this.uncoveredGoals);
 		for (int i = 0; i<ranking.getNumberOfSubfronts(); i++){

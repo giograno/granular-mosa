@@ -120,7 +120,8 @@ public class TestGeneration {
 				new Option("regressionSuite", "generate a regression test suite"),
 				new Option("regressionTests", "generate a regression test suite of individual tests"),
 				new Option("generateMOSuite", "use many objective test generation (MOSA). "),
-				new Option("generateSuiteUsingDSE", "use Dynamic Symbolic Execution to generate test suite")
+				new Option("generateSuiteUsingDSE", "use Dynamic Symbolic Execution to generate test suite"),
+				new Option("boosted", "combines test method generation with test class generation")
 		};
 	}
 
@@ -149,7 +150,8 @@ public class TestGeneration {
 			strategy = Strategy.MOSUITE;
 		} else if (line.hasOption("generateSuiteUsingDSE")) {
 			strategy = Strategy.DSE;
-		}
+		} else if (line.hasOption("boosted"))
+			strategy = Strategy.BOOSTED;
 		return strategy;
 	}
 	
@@ -337,6 +339,9 @@ public class TestGeneration {
 			break;
 		case NOVELTY:
 			cmdLine.add("-Dstrategy=Novelty");
+			break;
+		case BOOSTED:
+			cmdLine.add("-Dstrategy=boosted");
 			break;
 		default:
 			throw new RuntimeException("Unsupported strategy: " + strategy);

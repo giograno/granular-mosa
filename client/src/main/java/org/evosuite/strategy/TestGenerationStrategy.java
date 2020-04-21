@@ -30,6 +30,7 @@ import org.evosuite.coverage.FitnessFunctions;
 import org.evosuite.coverage.TestFitnessFactory;
 import org.evosuite.graphs.cfg.CFGMethodAdapter;
 import org.evosuite.rmi.ClientServices;
+import org.evosuite.Properties.Criterion;
 import org.evosuite.ga.FitnessFunction;
 import org.evosuite.ga.stoppingconditions.GlobalTimeStoppingCondition;
 import org.evosuite.ga.stoppingconditions.MaxFitnessEvaluationsStoppingCondition;
@@ -42,8 +43,10 @@ import org.evosuite.ga.stoppingconditions.ZeroFitnessStoppingCondition;
 import org.evosuite.setup.TestCluster;
 import org.evosuite.statistics.RuntimeVariable;
 import org.evosuite.testcase.TestFitnessFunction;
+import org.evosuite.testcase.execution.ExecutionTracer;
 import org.evosuite.testsuite.TestSuiteChromosome;
 import org.evosuite.testsuite.TestSuiteFitnessFunction;
+import org.evosuite.utils.ArrayUtil;
 import org.evosuite.utils.LoggingUtils;
 
 /**
@@ -183,5 +186,15 @@ public abstract class TestGenerationStrategy {
 			}
 		}
 		return true;
+	}
+
+	protected void enableTestCalls() {
+		if (ArrayUtil.contains(Properties.CRITERION, Criterion.DEFUSE) ||
+				ArrayUtil.contains(Properties.CRITERION, Criterion.ALLDEFS) ||
+				ArrayUtil.contains(Properties.CRITERION, Criterion.STATEMENT) ||
+				ArrayUtil.contains(Properties.CRITERION, Criterion.RHO) ||
+				ArrayUtil.contains(Properties.CRITERION, Criterion.BRANCH) ||
+				ArrayUtil.contains(Properties.CRITERION, Criterion.AMBIGUITY))
+			ExecutionTracer.enableTraceCalls();
 	}
 }

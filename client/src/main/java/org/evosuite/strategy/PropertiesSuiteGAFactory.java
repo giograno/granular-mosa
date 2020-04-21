@@ -114,6 +114,8 @@ public class PropertiesSuiteGAFactory extends PropertiesSearchAlgorithmFactory<T
 			return new RegressionTestSuiteChromosomeFactory();
 		case MOSUITE:
 			return new TestSuiteChromosomeFactory(new RandomLengthTestFactory());
+		case BOOSTED:
+			return new TestSuiteChromosomeFactory(new RandomLengthTestFactory());
 		default:
 			throw new RuntimeException("Unsupported test factory: "
 					+ Properties.TEST_FACTORY);

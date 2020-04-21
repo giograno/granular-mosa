@@ -5,7 +5,8 @@ public class SmellFreeMOSALauncher {
     public static void main(String[] args) {
 
         String[] command = {
-                "-generateMOSuite",
+//                "-generateMOSuite",
+                "-boosted",
                 "-Dcriterion=BRANCH",
                 "-Dconfiguration_id=test",
                 "-Dminimize=false",
@@ -15,9 +16,9 @@ public class SmellFreeMOSALauncher {
                 "-Dmap_CUT_calls=true",
                 "-Dassertions=false",
                 "-Dno_et=1",
-                "-Dstopping_condition=MAXGENERATIONS",
-                "-Dsearch_budget=1",
-                "-Dclient_on_thread=true",
+//                "-Dstopping_condition=MAXGENERATIONS",
+                "-Dsearch_budget=30",
+                "-Dclient_on_thread=false",
                 "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals," +
                         "Generations,Statements_Executed,Fitness_Evaluations,Tests_Executed,Generations,Total_Time," +
                         "Size,Result_Size,Length,Result_Length,BranchCoverage,NoEagerTest",
