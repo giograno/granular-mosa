@@ -59,6 +59,7 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
 
     private GenerationResults generateTestsPerStep(Properties.Algorithm chosen,
                                                    GenerationResults previousStepResults) {
+        LoggingUtils.getEvoLogger().info("Phase started with + " + chosen);
         GenerationResults generationResults = new GenerationResults();
         Properties.ALGORITHM = chosen;
         logger.debug("Starting step with: " + chosen);
@@ -84,7 +85,6 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
 
         algorithm.addFitnessFunctions((List)fitnessFunctions);
         algorithm.addListener(progressMonitor);
-
         enableTestCalls();
 
         algorithm.resetStoppingConditions();
