@@ -5,6 +5,7 @@ import org.evosuite.coverage.TestFitnessFactory;
 import org.evosuite.ga.ChromosomeFactory;
 import org.evosuite.ga.FitnessFunction;
 import org.evosuite.ga.metaheuristics.GeneticAlgorithm;
+import org.evosuite.ga.metaheuristics.mosa.MOSA;
 import org.evosuite.ga.stoppingconditions.MaxStatementsStoppingCondition;
 import org.evosuite.result.TestGenerationResultBuilder;
 import org.evosuite.rmi.ClientServices;
@@ -16,22 +17,31 @@ import org.evosuite.testsuite.TestSuiteChromosome;
 import org.evosuite.utils.ArrayUtil;
 import org.evosuite.utils.LoggingUtils;
 import org.evosuite.utils.Randomness;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Tests generation combining SMOSA with MOSA (two-step approach)
  */
 public class BoostedTestingStrategy extends TestGenerationStrategy {
 
+    private static final Logger logger = LoggerFactory.getLogger(BoostedTestingStrategy.class);
     /**
      * The result of a generation should be the obtained test suites and the yet to cover targets
      */
     private class GenerationResults {
+        // stores the best suite resulting from a step
         public TestSuiteChromosome bestSuite;
+        // stores the list of fitness functions that still need to be covered
         public List<TestFitnessFunction> yetToCoverFitnessFunctions;
+        // flag for full achieved full coverage
         public boolean fullCoverage = false;
+        // size of the last set of fitness functions
+        public int fitnessFunctionSize = 0;
     }
 
     @Override
@@ -41,6 +51,9 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             return firstStep.bestSuite;
         GenerationResults secondStep = generateTestsPerStep(Properties.Algorithm.MOSA, firstStep);
         firstStep.bestSuite.addTests(secondStep.bestSuite.getTestChromosomes());
+        sendExecutionStatistics();
+        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Total_Goals,
+                firstStep.fitnessFunctionSize - (secondStep.fitnessFunctionSize-firstStep.fitnessFunctionSize));
         return firstStep.bestSuite;
     }
 
@@ -48,6 +61,7 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
                                                    GenerationResults previousStepResults) {
         GenerationResults generationResults = new GenerationResults();
         Properties.ALGORITHM = chosen;
+        logger.debug("Starting step with: " + chosen);
         PropertiesSuiteGAFactory algorithmFactory = new PropertiesSuiteGAFactory();
         GeneticAlgorithm<TestSuiteChromosome> algorithm = algorithmFactory.getSearchAlgorithm();
 
@@ -90,6 +104,11 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             } else {
                 testSuite = bestSuites.get(0);
                 generationResults.bestSuite = testSuite;
+                // todo: here it needs to return the set of uncovered goals
+                Set uncoveredGoals = ((MOSA) algorithm).getUncoveredGoals();
+                logger.debug("Number of goals still to cover: " + uncoveredGoals.size());
+                logger.debug("Number of covered goals: " + testSuite.getCoveredGoals().size());
+                generationResults.yetToCoverFitnessFunctions = new ArrayList<>(uncoveredGoals);
             }
         } else {
             zeroFitness.setFinished();
@@ -99,6 +118,7 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             generationResults.bestSuite = testSuite;
             generationResults.fullCoverage = true;
         }
+        generationResults.fitnessFunctionSize = algorithm.getFitnessFunctions().size();
 
         long endTime = System.currentTimeMillis() / 1000;
 
@@ -114,14 +134,6 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
                 + MaxStatementsStoppingCondition.getNumExecutedStatements()
                 + text
                 + testSuite.getFitness());
-        // Search is finished, send statistics
-        sendExecutionStatistics();
-
-        // We send the info about the total number of coverage goals/targets only after
-        // the end of the search. This is because the number of coverage targets may vary
-        // when the criterion Properties.Criterion.EXCEPTION is used (exception coverage
-        // goal are dynamically added when the generated tests trigger some exceptions
-        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Total_Goals, algorithm.getFitnessFunctions().size());
 
         return generationResults;
     }

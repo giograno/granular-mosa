@@ -298,6 +298,14 @@ public class MOSA<T extends Chromosome> extends AbstractMOSA<T> {
 		return (T) best;
 	}
 
+	/**
+	 * Returns the set of uncovered goals
+	 * @return a @{@link Set} of FitnessFunction
+	 */
+	public Set<FitnessFunction<T>> getUncoveredGoals() {
+		return uncoveredGoals;
+	}
+
 	protected double numberOfCoveredTargets(){
 		return this.archive.keySet().size();
 	}
