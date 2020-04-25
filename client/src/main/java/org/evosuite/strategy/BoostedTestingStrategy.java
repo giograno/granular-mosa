@@ -38,22 +38,42 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
         public TestSuiteChromosome bestSuite;
         // stores the list of fitness functions that still need to be covered
         public List<TestFitnessFunction> yetToCoverFitnessFunctions;
+        // stores the covered goals
+        public List<TestFitnessFunction> coveredFitnessFunctions;
         // flag for full achieved full coverage
         public boolean fullCoverage = false;
-        // size of the last set of fitness functions
-        public int fitnessFunctionSize = 0;
     }
 
     @Override
     public TestSuiteChromosome generateTests() {
         GenerationResults firstStep = generateTestsPerStep(Properties.Algorithm.SMOSA, null);
-        if (firstStep.fullCoverage)
+        if (firstStep.fullCoverage) {
+            sendExecutionStatistics();
+            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepGoals,
+                    firstStep.coveredFitnessFunctions.size());
+            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepGoals, 0);
+            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepSize,
+                    firstStep.bestSuite.size());
+            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepSize, 0);
+            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Total_Goals,
+                    firstStep.coveredFitnessFunctions.size());
             return firstStep.bestSuite;
+        }
         GenerationResults secondStep = generateTestsPerStep(Properties.Algorithm.MOSA, firstStep);
         firstStep.bestSuite.addTests(secondStep.bestSuite.getTestChromosomes());
         sendExecutionStatistics();
+        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepGoals,
+                firstStep.coveredFitnessFunctions.size());
+        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepGoals,
+                secondStep.coveredFitnessFunctions.size());
+        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepSize,
+                firstStep.bestSuite.size());
+        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepSize,
+                secondStep.bestSuite.size());
         ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Total_Goals,
-                firstStep.fitnessFunctionSize - (secondStep.fitnessFunctionSize-firstStep.fitnessFunctionSize));
+                firstStep.coveredFitnessFunctions.size()
+                        + secondStep.coveredFitnessFunctions.size()
+                        + secondStep.yetToCoverFitnessFunctions.size());
         return firstStep.bestSuite;
     }
 
@@ -81,7 +101,7 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
                 fitnessFunctions.addAll(goalFactory.getCoverageGoals());
         } else
             /** add previously uncovered goals */
-            fitnessFunctions = ((List)previousStepResults.yetToCoverFitnessFunctions);
+            fitnessFunctions = previousStepResults.yetToCoverFitnessFunctions;
 
         algorithm.addFitnessFunctions((List)fitnessFunctions);
         algorithm.addListener(progressMonitor);
@@ -106,9 +126,11 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
                 generationResults.bestSuite = testSuite;
                 // todo: here it needs to return the set of uncovered goals
                 Set uncoveredGoals = ((MOSA) algorithm).getUncoveredGoals();
+                Set coveredGoals = ((MOSA)algorithm).getCoveredGoals();
                 logger.debug("Number of goals still to cover: " + uncoveredGoals.size());
-                logger.debug("Number of covered goals: " + testSuite.getCoveredGoals().size());
+                logger.debug("Number of covered goals: " + coveredGoals);
                 generationResults.yetToCoverFitnessFunctions = new ArrayList<>(uncoveredGoals);
+                generationResults.coveredFitnessFunctions = new ArrayList<>(coveredGoals);
             }
         } else {
             zeroFitness.setFinished();
@@ -117,8 +139,9 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
                 testSuite.setCoverage(ff, 1.0);
             generationResults.bestSuite = testSuite;
             generationResults.fullCoverage = true;
+            generationResults.yetToCoverFitnessFunctions = new ArrayList<>();
+            generationResults.coveredFitnessFunctions = new ArrayList<>(((MOSA)algorithm).getCoveredGoals());
         }
-        generationResults.fitnessFunctionSize = algorithm.getFitnessFunctions().size();
 
         long endTime = System.currentTimeMillis() / 1000;
 

@@ -383,8 +383,12 @@ public enum RuntimeVariable {
 	/** Used in the comparison between LISP and MOSA */
 	Time2MaxCoverage,
 	/** number of UUT calls to determine Eager Test */
-	NoEagerTest
-	
+	NoEagerTest,
+	/** coverages for different steps*/
+	FirstStepSize,
+	SecondStepSize,
+	FirstStepGoals,
+	SecondStepGoals
 	;
 	/* -------------------------------------------------- */
 
