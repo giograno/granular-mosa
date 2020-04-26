@@ -36,6 +36,7 @@ EXPERIMENT_NAME="smosa"
 STRATEGY = "-generateMOSuite"
 ALGORITHM = "SMOSA"
 BUDGET = 180
+NO_ET = 1
 
 def getScriptHead():
     s =  "#!/bin/bash\n"
