@@ -128,7 +128,7 @@ def getEvoSuiteCall(seed, configId, config, project, clazz, id, strategy, coreIn
   result += ' -Dconfiguration_id='+CONFIG_NAME
 
   result += " -projectCP " + class_path
-  result += ' -Doutput_variables=TARGET_CLASS,criterion,configuration_id,Total_Branches,Lines,Covered_Goals,Generations,Statements_Executed,Fitness_Evaluations,Tests_Executed,Generations,Total_Time,Size,Random_Seed,BranchCoverage,LineCoverage,WeakMutationScore,ExceptionCoverage,InputCoverage,OutputCoverage,MethodCoverage,MutationScore,NoEagerTest'
+  result += ' -Doutput_variables=TARGET_CLASS,criterion,configuration_id,Total_Branches,Lines,Covered_Goals,Generations,Statements_Executed,Fitness_Evaluations,Tests_Executed,Generations,Total_Time,Size,Length,Random_Seed,BranchCoverage,LineCoverage,WeakMutationScore,ExceptionCoverage,InputCoverage,OutputCoverage,MethodCoverage,MutationScore,NoEagerTest'
   if strategy == '-boosted':
     result += ',FirstStepGoals,SecondStepGoals,FirstStepSize,SecondStepSize'
   result += " -Dgroup_id="+project
