@@ -60,8 +60,6 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             return firstStep.bestSuite;
         }
         GenerationResults secondStep = generateTestsPerStep(Properties.Algorithm.MOSA, firstStep);
-        firstStep.bestSuite.addTests(secondStep.bestSuite.getTestChromosomes());
-        sendExecutionStatistics();
         ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepGoals,
                 firstStep.coveredFitnessFunctions.size());
         ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepGoals,
@@ -74,6 +72,8 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
                 firstStep.coveredFitnessFunctions.size()
                         + secondStep.coveredFitnessFunctions.size()
                         + secondStep.yetToCoverFitnessFunctions.size());
+        firstStep.bestSuite.addTests(secondStep.bestSuite.getTestChromosomes());
+        sendExecutionStatistics();
         return firstStep.bestSuite;
     }
 
