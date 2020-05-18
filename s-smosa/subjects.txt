@@ -32,7 +32,6 @@
 108_liferay	com.liferay.portal.deploy.hot.ThemeHotDeployListener
 108_liferay	com.liferay.portal.kernel.concurrent.CoalescedPipe
 108_liferay	com.liferay.portal.kernel.util.ListWrapper
-108_liferay	com.liferay.portal.kernel.util.SafeProperties
 108_liferay	com.liferay.portal.kernel.workflow.messaging.DefaultWorkflowDestinationEventListener
 108_liferay	com.liferay.portal.model.impl.ServiceComponentCacheModel
 108_liferay	com.liferay.portal.scripting.ScriptingImpl
