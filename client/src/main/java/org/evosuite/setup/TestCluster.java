@@ -667,52 +667,23 @@ public class TestCluster {
 	}
 
 	public GenericAccessibleObject<?> getRandomCallFor(GenericClass clazz, TestCase test, int position)
-	        throws ConstructionFailedException {
-
-		/** if the algorithm is SMOSA and the number of call has been reached, do not add any method */
-		boolean hasCall = ((DefaultTestCase)test).hasCalls();
-		if (Properties.ALGORITHM == Properties.Algorithm.SMOSA &&
-				Properties.CUT_CALLS && clazz.getClassName() == Properties.TARGET_CLASS && hasCall)
-			return null;
+			throws ConstructionFailedException {
 
 		Set<GenericAccessibleObject<?>> calls = getCallsFor(clazz, true);
-		Iterator<GenericAccessibleObject<?>> iter = calls.iterator();
-		while(iter.hasNext()) {
-			GenericAccessibleObject<?> gao = iter.next();
-			if (! ConstraintVerifier.isValidPositionForInsertion(gao,test,position)){
-				iter.remove();
-			}
-		}
+		calls.removeIf(gam -> !ConstraintVerifier.isValidPositionForInsertion(gam, test, position));
 
 		if (calls.isEmpty()) {
 			throw new ConstructionFailedException("No modifiers for " + clazz);
 		}
 		logger.debug("Possible modifiers for " + clazz + ": " + calls);
 
-		GenericAccessibleObject<?> call;
-		if (SMOSACustomization() && clazz.getClassName() == Properties.TARGET_CLASS) {
-			call = getCandidateMethodCall(calls);
-			if (call.hasTypeParameters())
-				call = call.getGenericInstantiation(clazz);
-			return call;
-		}
-
-		call = Randomness.choice(calls);
-
-		// todo: we should fix the problem with subclasses that calls a method of the CUT superclass
-//		if (call instanceof GenericMethod)
-//			if (hasCall && Properties.ALGORITHM == Properties.Algorithm.SMOSA
-//					&& call.getDeclaringClass().getName() == Properties.TARGET_CLASS)
-//				return null;
-
+		GenericAccessibleObject<?> call = Randomness.choice(calls);
 		if (call.hasTypeParameters()) {
 			logger.debug("Modifier has type parameters");
 			call = call.getGenericInstantiation(clazz);
 		}
 		return call;
 	}
-
-
 
 	/**
 	 * First sees if there is a call to the class available. If not, just returns a random call;

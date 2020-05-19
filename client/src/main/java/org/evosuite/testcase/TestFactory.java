@@ -2294,14 +2294,14 @@ public class TestFactory {
                 }
 
                 GenericAccessibleObject<?> call = TestCluster.getInstance().getRandomCallFor(var.getGenericClass(), test, position);
-				logger.debug("Chosen call {}", call);
-				if (Properties.ALGORITHM == Properties.Algorithm.SMOSA && call == null)
-					return true;
-				boolean res = addCallFor(test, var, call, position);
+
 				/** in case the call was for the CUT and the insertion is successful, increase the counter */
-				if (var.getGenericClass().getClassName() == Properties.TARGET_CLASS && res)
-					if (!TestCluster.getInstance().isSetterMethod(call))
-						((DefaultTestCase)test).increaseCalls();
+				boolean res = addCallFor(test, var, call, position);
+				if (res && TestCluster.getInstance().SMOSACustomization())
+					if (call.getDeclaringClass().getCanonicalName().equals(Properties.TARGET_CLASS))
+						if (!TestCluster.getInstance().isSetterMethod(call))
+							((DefaultTestCase)test).increaseCalls();
+
 				return res;
 			} catch (ConstructionFailedException e) {
 				logger.debug("Found no modifier: {}", e);
