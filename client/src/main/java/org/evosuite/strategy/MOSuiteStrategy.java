@@ -31,6 +31,7 @@ import org.evosuite.result.TestGenerationResultBuilder;
 import org.evosuite.rmi.ClientServices;
 import org.evosuite.rmi.service.ClientState;
 import org.evosuite.statistics.RuntimeVariable;
+import org.evosuite.testcase.TestChromosome;
 import org.evosuite.testcase.TestFitnessFunction;
 import org.evosuite.testcase.execution.ExecutionTracer;
 import org.evosuite.testcase.factories.RandomLengthTestFactory;
@@ -152,8 +153,25 @@ public class MOSuiteStrategy extends TestGenerationStrategy {
 		// when the criterion Properties.Criterion.EXCEPTION is used (exception coverage
 		// goal are dynamically added when the generated tests trigger some exceptions
 		ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Total_Goals, algorithm.getFitnessFunctions().size());
-		
+
+		sendStatistics(testSuite);
 		return testSuite;
 	}
-	
+
+	private void sendStatistics(TestSuiteChromosome testSuite) {
+		int firstStep = 0;
+		int secondStep = 0;
+		for (TestChromosome chromosome: testSuite.getTestChromosomes()) {
+			chromosome.computeEagerTest();
+			boolean notSmelly = chromosome.isSmellFree();
+			if (notSmelly)
+				firstStep ++;
+			else
+				secondStep++;
+		}
+		ClientServices.getInstance().getClientNode().trackOutputVariable(
+				RuntimeVariable.FirstStepSize, firstStep);
+		ClientServices.getInstance().getClientNode().trackOutputVariable(
+				RuntimeVariable.SecondStepSize, secondStep);
+	}
 }

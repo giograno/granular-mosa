@@ -103,23 +103,13 @@ public class StatisticsSender {
 
 	private static void sendEagerTestInformation(TestSuiteChromosome testSuite) {
 		boolean isClean = true;
-		int firstStep = 0;
-		int secondStep = 0;
 		for (TestChromosome chromosome: testSuite.getTestChromosomes()) {
 			chromosome.computeEagerTest();
 			boolean notSmelly = chromosome.isSmellFree();
-			if (notSmelly)
-				firstStep ++;
-			else
-				secondStep++;
 			isClean = isClean && notSmelly;
 		}
 		ClientServices.getInstance().getClientNode().trackOutputVariable(
 				RuntimeVariable.NoEagerTest, isClean ? 1 : 0);
-		ClientServices.getInstance().getClientNode().trackOutputVariable(
-				RuntimeVariable.FirstStepSize, firstStep);
-		ClientServices.getInstance().getClientNode().trackOutputVariable(
-				RuntimeVariable.SecondStepSize, secondStep);
 	}
 
 	private static void sendExceptionInfo(TestSuiteChromosome testSuite) {

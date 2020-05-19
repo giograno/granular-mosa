@@ -79,7 +79,7 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
 
     private GenerationResults generateTestsPerStep(Properties.Algorithm chosen,
                                                    GenerationResults previousStepResults) {
-        LoggingUtils.getEvoLogger().info("Phase started with + " + chosen);
+        LoggingUtils.getEvoLogger().info("Phase started with " + chosen);
         GenerationResults generationResults = new GenerationResults();
         Properties.ALGORITHM = chosen;
         logger.debug("Starting step with: " + chosen);
@@ -99,9 +99,11 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             List<TestFitnessFactory<? extends TestFitnessFunction>> goalFactories = getFitnessFactories();
             for (TestFitnessFactory<? extends TestFitnessFunction> goalFactory : goalFactories)
                 fitnessFunctions.addAll(goalFactory.getCoverageGoals());
-        } else
+        } else {
             /** add previously uncovered goals */
             fitnessFunctions = previousStepResults.yetToCoverFitnessFunctions;
+            LoggingUtils.getEvoLogger().info(fitnessFunctions.size() + " fitness functions left!");
+        }
 
         algorithm.addFitnessFunctions((List)fitnessFunctions);
         algorithm.addListener(progressMonitor);
