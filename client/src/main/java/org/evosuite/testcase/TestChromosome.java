@@ -780,19 +780,11 @@ public class TestChromosome extends ExecutableChromosome {
 		ListenableList<Statement> statements = ((DefaultTestCase) this.test).getStatements();
 		Set<String> methodStatements = statements.stream().filter(s -> s instanceof MethodStatement)
 				.filter(s -> ((MethodStatement) s).getMethod().getMethod()
-						.getDeclaringClass().getName() == Properties.TARGET_CLASS)
+						.getDeclaringClass().getCanonicalName() == Properties.TARGET_CLASS)
 				/** do not count getters and setters */
 				.filter(s -> !TestCluster.getInstance().isSetterMethod(((MethodStatement) s).getMethod()))
 						.map(s -> s.toString())
 						.collect(Collectors.toSet());
-
-//		logger.debug("Number of methods found = " + methodStatements.size());
-//		if (methodStatements.size() > 2) {
-//			logger.warn(this.test.toCode());
-//			for (String stmt: methodStatements)
-//				logger.warn(stmt);
-//		}
 		setSmellFree(methodStatements.size() <= Properties.NO_CALLS_ET);
 	}
-
 }
