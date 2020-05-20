@@ -429,8 +429,23 @@ public class TestSuiteGenerator {
 
 				TestSuiteMinimizer minimizer = new TestSuiteMinimizer(getFitnessFactories());
 
-				LoggingUtils.getEvoLogger().info("* Minimizing test suite");
-				minimizer.minimize(testSuite, true);
+				if (Properties.STRATEGY == Properties.STRATEGY.BOOSTED) {
+					TestSuiteChromosome tempSuite = new TestSuiteChromosome();
+					TestSuiteChromosome secondStepSuite = new TestSuiteChromosome();
+					secondStepSuite.addTests(testSuite.getSecondStepTests());
+					tempSuite.addTests(testSuite.getFirstStepTests());
+					LoggingUtils.getEvoLogger().info("* Minimizing test suite");
+					LoggingUtils.getEvoLogger().info("* Second Step Suite Size => " + secondStepSuite.size());
+					minimizer.minimize(secondStepSuite, true);
+					LoggingUtils.getEvoLogger().info("* After minimization => " + secondStepSuite.size());
+					tempSuite.addTests(secondStepSuite.getTestChromosomes());
+					testSuite = tempSuite;
+				} else {
+					int size_before = testSuite.size();
+					minimizer.minimize(testSuite, true);
+					int size_after = testSuite.size();
+					LoggingUtils.getEvoLogger().info("* From " + size_before + " to " + size_after);
+				}
 
 				double after = testSuite.getFitness();
 				if (after > before + 0.01d) { // assume minimization
