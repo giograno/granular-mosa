@@ -430,16 +430,20 @@ public class TestSuiteGenerator {
 				TestSuiteMinimizer minimizer = new TestSuiteMinimizer(getFitnessFactories());
 
 				if (Properties.STRATEGY == Properties.STRATEGY.BOOSTED) {
-					TestSuiteChromosome tempSuite = new TestSuiteChromosome();
-					TestSuiteChromosome secondStepSuite = new TestSuiteChromosome();
-					secondStepSuite.addTests(testSuite.getSecondStepTests());
-					tempSuite.addTests(testSuite.getFirstStepTests());
-					LoggingUtils.getEvoLogger().info("* Minimizing test suite");
-					LoggingUtils.getEvoLogger().info("* Second Step Suite Size => " + secondStepSuite.size());
-					minimizer.minimize(secondStepSuite, true);
-					LoggingUtils.getEvoLogger().info("* After minimization => " + secondStepSuite.size());
-					tempSuite.addTests(secondStepSuite.getTestChromosomes());
-					testSuite = tempSuite;
+					BoostedTestSuiteMinimizer boostedMinimizer = new BoostedTestSuiteMinimizer(getFitnessFactories());
+
+					/** minimization of the first part **/
+					TestSuiteChromosome temporarySuite = new TestSuiteChromosome();
+					temporarySuite.addTests(testSuite.getFirstStepTests());
+					boostedMinimizer.minimize(0, temporarySuite);
+
+					/** minimization of the second part **/
+					TestSuiteChromosome secondPart = new TestSuiteChromosome();
+					secondPart.addTests(testSuite.getSecondStepTests());
+					boostedMinimizer.minimize(1, secondPart);
+
+					temporarySuite.addTests(secondPart.getTestChromosomes());
+					testSuite = temporarySuite;
 				} else {
 					int size_before = testSuite.size();
 					minimizer.minimize(testSuite, true);

@@ -140,7 +140,7 @@ public class TestSuiteMinimizer {
      *
      * @param suite a {@link org.evosuite.testsuite.TestSuiteChromosome} object.
      */
-    private void minimizeTests(TestSuiteChromosome suite) {
+    protected void minimizeTests(TestSuiteChromosome suite) {
 
         logger.info("Minimizing per test");
 
