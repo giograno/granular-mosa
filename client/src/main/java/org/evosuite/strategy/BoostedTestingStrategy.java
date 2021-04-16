@@ -30,6 +30,7 @@ import java.util.Set;
 public class BoostedTestingStrategy extends TestGenerationStrategy {
 
     private static final Logger logger = LoggerFactory.getLogger(BoostedTestingStrategy.class);
+
     /**
      * The result of a generation should be the obtained test suites and the yet to cover targets
      */
@@ -47,30 +48,23 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
     @Override
     public TestSuiteChromosome generateTests() {
         TestSuiteChromosome suite = new TestSuiteChromosome();
-
         GenerationResults firstStep = generateTestsPerStep(Properties.Algorithm.SMOSA, null);
         if (firstStep.fullCoverage) {
             sendExecutionStatistics();
-            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepGoals,
+            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStep_Goals,
                     firstStep.coveredFitnessFunctions.size());
-            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepGoals, 0);
-            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepSize,
-                    firstStep.bestSuite.size());
-            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepSize, 0);
+            ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStep_Goals, 0);
             ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Total_Goals,
                     firstStep.coveredFitnessFunctions.size());
             suite.addFirstStepSuite(firstStep.bestSuite.getTestChromosomes());
             return suite;
         }
         GenerationResults secondStep = generateTestsPerStep(Properties.Algorithm.MOSA, firstStep);
-        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepGoals,
+        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStep_Goals,
                 firstStep.coveredFitnessFunctions.size());
-        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepGoals,
+        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStep_Goals,
                 secondStep.coveredFitnessFunctions.size());
-        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepSize,
-                firstStep.bestSuite.size());
-        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepSize,
-                secondStep.bestSuite.size());
+        // todo: check if these goal stats are accurate
         ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Total_Goals,
                 firstStep.coveredFitnessFunctions.size()
                         + secondStep.coveredFitnessFunctions.size()
@@ -80,6 +74,14 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
         return suite;
     }
 
+    /**
+     * Start a new generation process with a given algorithm and with (eventually) a result from a previous
+     * generation
+     *
+     * @param chosen              the selected algorithm
+     * @param previousStepResults the results of the previous generation
+     * @return a new <code>{@link GenerationResults}</code>
+     */
     private GenerationResults generateTestsPerStep(Properties.Algorithm chosen,
                                                    GenerationResults previousStepResults) {
         LoggingUtils.getEvoLogger().info("Phase started with " + chosen);
@@ -92,7 +94,7 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
         ChromosomeFactory factory = new RandomLengthTestFactory();
         algorithm.setChromosomeFactory(factory);
 
-        if(Properties.SERIALIZE_GA || Properties.CLIENT_ON_THREAD)
+        if (Properties.SERIALIZE_GA || Properties.CLIENT_ON_THREAD)
             TestGenerationResultBuilder.getInstance().setGeneticAlgorithm(algorithm);
 
         long startTime = System.currentTimeMillis() / 1000;
@@ -108,7 +110,7 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             LoggingUtils.getEvoLogger().info(fitnessFunctions.size() + " fitness functions left!");
         }
 
-        algorithm.addFitnessFunctions((List)fitnessFunctions);
+        algorithm.addFitnessFunctions((List) fitnessFunctions);
         algorithm.addListener(progressMonitor);
         enableTestCalls();
 
@@ -116,7 +118,8 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
 
         TestSuiteChromosome testSuite;
 
-        if (!(Properties.STOP_ZERO && fitnessFunctions.isEmpty()) || ArrayUtil.contains(Properties.CRITERION, Properties.Criterion.EXCEPTION)) {
+        if (!(Properties.STOP_ZERO && fitnessFunctions.isEmpty())
+                || ArrayUtil.contains(Properties.CRITERION, Properties.Criterion.EXCEPTION)) {
             LoggingUtils.getEvoLogger().info("* Using seed {}", Randomness.getSeed());
             LoggingUtils.getEvoLogger().info("* Starting evolution");
             ClientServices.getInstance().getClientNode().changeState(ClientState.SEARCH);
@@ -129,9 +132,9 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             } else {
                 testSuite = bestSuites.get(0);
                 generationResults.bestSuite = testSuite;
-                // todo: here it needs to return the set of uncovered goals
+
                 Set uncoveredGoals = ((MOSA) algorithm).getUncoveredGoals();
-                Set coveredGoals = ((MOSA)algorithm).getCoveredGoals();
+                Set coveredGoals = ((MOSA) algorithm).getCoveredGoals();
                 logger.debug("Number of goals still to cover: " + uncoveredGoals.size());
                 logger.debug("Number of covered goals: " + coveredGoals);
                 generationResults.yetToCoverFitnessFunctions = new ArrayList<>(uncoveredGoals);
@@ -145,7 +148,7 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             generationResults.bestSuite = testSuite;
             generationResults.fullCoverage = true;
             generationResults.yetToCoverFitnessFunctions = new ArrayList<>();
-            generationResults.coveredFitnessFunctions = new ArrayList<>(((MOSA)algorithm).getCoveredGoals());
+            generationResults.coveredFitnessFunctions = new ArrayList<>(((MOSA) algorithm).getCoveredGoals());
         }
 
         long endTime = System.currentTimeMillis() / 1000;
