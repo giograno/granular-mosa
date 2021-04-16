@@ -46,6 +46,8 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
 
     @Override
     public TestSuiteChromosome generateTests() {
+        TestSuiteChromosome suite = new TestSuiteChromosome();
+
         GenerationResults firstStep = generateTestsPerStep(Properties.Algorithm.SMOSA, null);
         if (firstStep.fullCoverage) {
             sendExecutionStatistics();
@@ -57,7 +59,8 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStepSize, 0);
             ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Total_Goals,
                     firstStep.coveredFitnessFunctions.size());
-            return firstStep.bestSuite;
+            suite.addFirstStepSuite(firstStep.bestSuite.getTestChromosomes());
+            return suite;
         }
         GenerationResults secondStep = generateTestsPerStep(Properties.Algorithm.MOSA, firstStep);
         ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStepGoals,
@@ -72,9 +75,9 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
                 firstStep.coveredFitnessFunctions.size()
                         + secondStep.coveredFitnessFunctions.size()
                         + secondStep.yetToCoverFitnessFunctions.size());
-        firstStep.bestSuite.addTests(secondStep.bestSuite.getTestChromosomes());
+        suite.addSecondStepSuite(secondStep.bestSuite.getTestChromosomes());
         sendExecutionStatistics();
-        return firstStep.bestSuite;
+        return suite;
     }
 
     private GenerationResults generateTestsPerStep(Properties.Algorithm chosen,
