@@ -480,6 +480,7 @@ public class TestSuiteGenerator {
 		}
 
 		StatisticsSender.executedAndThenSendIndividualToMaster(testSuite);
+		StatisticsSender.sendEagerTestInformation(testSuite, false);
 		LoggingUtils.getEvoLogger().info(
 				"* Generated " + testSuite.size() + " tests with total length " + testSuite.totalLengthOfTestCases());
 
@@ -676,6 +677,7 @@ public class TestSuiteGenerator {
 		}
 
 		StatisticsSender.executedAndThenSendIndividualToMaster(testSuite);
+		StatisticsSender.sendEagerTestInformation(testSuite, true);
 		TestSuiteGeneratorHelper.getBytecodeStatistics();
 
 		ClientServices.getInstance().getClientNode().publishPermissionStatistics();

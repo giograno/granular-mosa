@@ -90,7 +90,6 @@ public class StatisticsSender {
         sendCoveredInfo(testSuite);
         sendExceptionInfo(testSuite);
         sendIndividualToMaster(testSuite);
-        sendEagerTestInformation(testSuite);
     }
 
     // -------- private methods ------------------------
@@ -100,7 +99,7 @@ public class StatisticsSender {
      *
      * @param testSuite the test suite to analyze
      */
-    private static void sendEagerTestInformation(TestSuiteChromosome testSuite) {
+    public static void sendEagerTestInformation(TestSuiteChromosome testSuite, boolean preMinimization) {
         int count = 0;
         for (TestChromosome chromosome : testSuite.getTestChromosomes()) {
             chromosome.computeEagerTest();
@@ -108,8 +107,12 @@ public class StatisticsSender {
             if (!notSmelly)
                 count++;
 
-            ClientServices.getInstance().getClientNode().trackOutputVariable(
-                    RuntimeVariable.NoEagerTest, count);
+            if (preMinimization)
+                ClientServices.getInstance().getClientNode().trackOutputVariable(
+                        RuntimeVariable.Result_NoEagerTests, count);
+            else
+                ClientServices.getInstance().getClientNode().trackOutputVariable(
+                        RuntimeVariable.NoEagerTests, count);
         }
     }
 
