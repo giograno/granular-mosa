@@ -36,15 +36,14 @@ import java.util.*;
 
 /**
  * Class responsible to send "individuals" from Client to Master process.
- * All sending of individuals should go through this class, and not 
+ * All sending of individuals should go through this class, and not
  * calling ClientServices directly
  *
  * <p>
  * TODO: still to clarify what type of extra information we want to send with each individual,
- * eg the state in which it was computed (Search vs Minimization) 
+ * eg the state in which it was computed (Search vs Minimization)
  *
  * @author arcuri
- *
  */
 public class StatisticsSender {
 
@@ -96,25 +95,61 @@ public class StatisticsSender {
 
     // -------- private methods ------------------------
 
+    /**
+     * Computes the information about the number of eager tests in a test suite chromosome
+     *
+     * @param testSuite the test suite to analyze
+     */
     private static void sendEagerTestInformation(TestSuiteChromosome testSuite) {
-        boolean isClean = true;
-        int firstStep = 0;
-        int secondStep = 0;
+        int count = 0;
         for (TestChromosome chromosome : testSuite.getTestChromosomes()) {
             chromosome.computeEagerTest();
             boolean notSmelly = chromosome.isSmellFree();
-            if (notSmelly)
-                firstStep++;
-            else
-                secondStep++;
-            isClean = isClean && notSmelly;
+            if (!notSmelly)
+                count++;
+
+            ClientServices.getInstance().getClientNode().trackOutputVariable(
+                    RuntimeVariable.NoEagerTest, count);
         }
-        ClientServices.getInstance().getClientNode().trackOutputVariable(
-                RuntimeVariable.NoEagerTest, isClean ? 1 : 0);
-        ClientServices.getInstance().getClientNode().trackOutputVariable(
-                RuntimeVariable.FirstStepSize, firstStep);
-        ClientServices.getInstance().getClientNode().trackOutputVariable(
-                RuntimeVariable.SecondStepSize, secondStep);
+    }
+
+    /**
+     * Computes the values of eager tests in the first and in the second step of the suite for a boosted approach
+     *
+     * @param testSuite       the test suite to analyze
+     * @param flag            0 for first step, 1 for the second
+     * @param preMinimization flag for pre or post minimization
+     */
+    public static void computeEagerTestInformation(TestSuiteChromosome testSuite, int flag, boolean preMinimization) {
+        /** one of the two steps should be empty **/
+        assert (testSuite.getFirstStepTests().size() == 0) || (testSuite.getSecondStepTests().size() == 0);
+        int count = 0;
+        for (TestChromosome chromosome : testSuite.getTestChromosomes()) {
+            chromosome.computeEagerTest();
+            boolean notSmelly = chromosome.isSmellFree();
+            if (!notSmelly)
+                count++;
+
+            if (flag == 0) {
+                /** first step */
+                if (preMinimization) {
+                    ClientServices.getInstance().getClientNode().trackOutputVariable(
+                            RuntimeVariable.FirstStep_Result_NoEager, count);
+                } else {
+                    ClientServices.getInstance().getClientNode().trackOutputVariable(
+                            RuntimeVariable.FirstStep_NoEager, count);
+                }
+            } else {
+                /** second step */
+                if (preMinimization) {
+                    ClientServices.getInstance().getClientNode().trackOutputVariable(
+                            RuntimeVariable.SecondStep_Result_NoEager, count);
+                } else {
+                    ClientServices.getInstance().getClientNode().trackOutputVariable(
+                            RuntimeVariable.SecondStep_NoEager, count);
+                }
+            }
+        }
     }
 
     private static void sendExceptionInfo(TestSuiteChromosome testSuite) {
@@ -152,13 +187,13 @@ public class StatisticsSender {
 
     private static void sendCoveredInfo(TestSuiteChromosome testSuite) {
 
-        Set<String> coveredMethods = new HashSet<String>();
-        Set<Integer> coveredTrueBranches = new HashSet<Integer>();
-        Set<Integer> coveredFalseBranches = new HashSet<Integer>();
-        Set<String> coveredBranchlessMethods = new HashSet<String>();
-        Set<Integer> coveredLines = new HashSet<Integer>();
-        Set<Integer> coveredRealBranches = new HashSet<Integer>();
-        Set<Integer> coveredInstrumentedBranches = new HashSet<Integer>();
+        Set<String> coveredMethods = new HashSet<>();
+        Set<Integer> coveredTrueBranches = new HashSet<>();
+        Set<Integer> coveredFalseBranches = new HashSet<>();
+        Set<String> coveredBranchlessMethods = new HashSet<>();
+        Set<Integer> coveredLines = new HashSet<>();
+        Set<Integer> coveredRealBranches = new HashSet<>();
+        Set<Integer> coveredInstrumentedBranches = new HashSet<>();
 
         for (TestChromosome test : testSuite.getTestChromosomes()) {
             ExecutionTrace trace = test.getLastExecutionResult().getTrace();
