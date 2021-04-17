@@ -432,6 +432,11 @@ public class TestSuiteGenerator {
 				if (Properties.STRATEGY == Properties.STRATEGY.BOOSTED) {
 					BoostedTestSuiteMinimizer boostedMinimizer = new BoostedTestSuiteMinimizer(getFitnessFactories());
 
+					ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Result_Size,
+							testSuite.size());
+					ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Result_Length,
+							testSuite.totalLengthOfTestCases());
+
 					/** minimization of the first part **/
 					TestSuiteChromosome temporarySuite = new TestSuiteChromosome();
 					temporarySuite.addTests(testSuite.getFirstStepTests());

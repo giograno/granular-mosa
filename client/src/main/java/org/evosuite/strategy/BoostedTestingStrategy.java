@@ -49,6 +49,7 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
     public TestSuiteChromosome generateTests() {
         TestSuiteChromosome suite = new TestSuiteChromosome();
         GenerationResults firstStep = generateTestsPerStep(Properties.Algorithm.SMOSA, null);
+
         if (firstStep.fullCoverage) {
             sendExecutionStatistics();
             ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStep_Goals,
@@ -59,16 +60,26 @@ public class BoostedTestingStrategy extends TestGenerationStrategy {
             suite.addFirstStepSuite(firstStep.bestSuite.getTestChromosomes());
             return suite;
         }
+
         GenerationResults secondStep = generateTestsPerStep(Properties.Algorithm.MOSA, firstStep);
+        /** Covered and uncovered goals for the fist step */
         ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStep_Goals,
+                firstStep.yetToCoverFitnessFunctions.size());
+        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStep_Covered_Goals,
                 firstStep.coveredFitnessFunctions.size());
+        /** Covered and uncovered goals for the second step */
         ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStep_Goals,
+                secondStep.yetToCoverFitnessFunctions.size());
+        ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStep_Covered_Goals,
                 secondStep.coveredFitnessFunctions.size());
-        // todo: check if these goal stats are accurate
+
+        /** total goals is the sum of covered from fist step, covered from second plus uncovered*/
         ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.Total_Goals,
                 firstStep.coveredFitnessFunctions.size()
                         + secondStep.coveredFitnessFunctions.size()
                         + secondStep.yetToCoverFitnessFunctions.size());
+
+        suite.addFirstStepSuite(firstStep.bestSuite.getTestChromosomes());
         suite.addSecondStepSuite(secondStep.bestSuite.getTestChromosomes());
         sendExecutionStatistics();
         return suite;
