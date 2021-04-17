@@ -396,8 +396,10 @@ public enum RuntimeVariable {
     SecondStep_Length, // post minimization
     SecondStep_Result_Length, // pre minimization
     /**  Keep trace of the goals for each step */
-    FirstStep_Goals,
+    FirstStep_Goals, // total goals for the step
+    FirstStep_Covered_Goals, // covered goals in the step
     SecondStep_Goals,
+    SecondStep_Covered_Goals,
     /** Number of eager tests in each step (it should be the same) only len changes */
     FirstStep_NoEager, // post minimization
     FirstStep_Result_NoEager, // pre minimization
