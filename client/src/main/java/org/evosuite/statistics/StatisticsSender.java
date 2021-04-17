@@ -106,14 +106,13 @@ public class StatisticsSender {
             boolean notSmelly = chromosome.isSmellFree();
             if (!notSmelly)
                 count++;
-
-            if (preMinimization)
-                ClientServices.getInstance().getClientNode().trackOutputVariable(
-                        RuntimeVariable.Result_NoEagerTests, count);
-            else
-                ClientServices.getInstance().getClientNode().trackOutputVariable(
-                        RuntimeVariable.NoEagerTests, count);
         }
+        if (preMinimization)
+            ClientServices.getInstance().getClientNode().trackOutputVariable(
+                    RuntimeVariable.Result_NoEagerTests, count);
+        else
+            ClientServices.getInstance().getClientNode().trackOutputVariable(
+                    RuntimeVariable.NoEagerTests, count);
     }
 
     /**
@@ -132,27 +131,28 @@ public class StatisticsSender {
             boolean notSmelly = chromosome.isSmellFree();
             if (!notSmelly)
                 count++;
+        }
 
-            if (flag == 0) {
-                /** first step */
-                if (preMinimization) {
-                    ClientServices.getInstance().getClientNode().trackOutputVariable(
-                            RuntimeVariable.FirstStep_Result_NoEager, count);
-                } else {
-                    ClientServices.getInstance().getClientNode().trackOutputVariable(
-                            RuntimeVariable.FirstStep_NoEager, count);
-                }
+        if (flag == 0) {
+            /** first step */
+            if (preMinimization) {
+                ClientServices.getInstance().getClientNode().trackOutputVariable(
+                        RuntimeVariable.FirstStep_Result_NoEager, count);
             } else {
-                /** second step */
-                if (preMinimization) {
-                    ClientServices.getInstance().getClientNode().trackOutputVariable(
-                            RuntimeVariable.SecondStep_Result_NoEager, count);
-                } else {
-                    ClientServices.getInstance().getClientNode().trackOutputVariable(
-                            RuntimeVariable.SecondStep_NoEager, count);
-                }
+                ClientServices.getInstance().getClientNode().trackOutputVariable(
+                        RuntimeVariable.FirstStep_NoEager, count);
+            }
+        } else {
+            /** second step */
+            if (preMinimization) {
+                ClientServices.getInstance().getClientNode().trackOutputVariable(
+                        RuntimeVariable.SecondStep_Result_NoEager, count);
+            } else {
+                ClientServices.getInstance().getClientNode().trackOutputVariable(
+                        RuntimeVariable.SecondStep_NoEager, count);
             }
         }
+
     }
 
     private static void sendExceptionInfo(TestSuiteChromosome testSuite) {
