@@ -71,7 +71,7 @@ public class BoostedTestSuiteMinimizer extends TestSuiteMinimizer {
             if (preMinimization) {
                 ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStep_Result_Size,
                         suite.size());
-                ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.FirstStep_Result_Length,
+                ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStep_Result_Length,
                         suite.totalLengthOfTestCases());
             } else {
                 ClientServices.getInstance().getClientNode().trackOutputVariable(RuntimeVariable.SecondStep_Size,

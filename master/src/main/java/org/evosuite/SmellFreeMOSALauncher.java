@@ -36,6 +36,11 @@ public class SmellFreeMOSALauncher {
                         "SecondStep_Covered_Goals," +
                         "FirstStep_Size," +
                         "SecondStep_Size," +
+                        "FirstStep_Length," +
+                        "FirstStep_Result_Length," +
+                        "SecondStep_Length," +
+                        "SecondStep_Result_Length," +
+                        "SecondStep_Size," +
                         "FirstStep_NoEager," +
                         "FirstStep_Result_NoEager," +
                         "SecondStep_NoEager," +
