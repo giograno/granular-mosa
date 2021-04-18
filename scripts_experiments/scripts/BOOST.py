@@ -29,7 +29,7 @@ EVOSUITE="/usr/bin/java -Xmx800M -jar \"" + HOME + "/evosuite.jar\""
 CASESTUDY_DIR=HOME + "/projects/"
 SOURCE_DIR = HOME + "/SF110/"
 
-CONFIG_NAME = "SMOSA"
+CONFIG_NAME = "BOOSTED"
 
 EXPERIMENT_NAME="boosted"
 

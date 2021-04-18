@@ -20,7 +20,6 @@ proc=$3
 echo "For more than one version, separate the number with a comma"
 echo "1 = MOSA"
 echo "2 = boosted approach (SMOSA + MOSA)"
-echo "3 = SMOSA"
 read choice
 
 rm -rf run.sh
@@ -37,10 +36,5 @@ do
         ${python_cmd} scripts/BOOST.py boost $seed1 $seed2 subjects.txt 1 $proc
         echo 'chmod 777 boost/scripts/ubuntu_EvoSuite_0.sh' >> run.sh
         echo './boost/scripts/ubuntu_EvoSuite_0.sh' >> run.sh
-    fi
-    if [ "$i" == "3" ]; then
-        ${python_cmd} scripts/SMOSA.py smosa $seed1 $seed2 subjects.txt 1 $proc
-        echo 'chmod 777 smosa/scripts/ubuntu_EvoSuite_0.sh' >> run.sh
-        echo './smosa/scripts/ubuntu_EvoSuite_0.sh' >> run.sh
     fi
 done
